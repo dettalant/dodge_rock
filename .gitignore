@@ -1,0 +1,9 @@
+# 初期からある設定
+/target
+**/*.rs.bk
+
+# .gitフォルダはいらない
+/.git
+
+# いちおうCargo.lockも除外
+Cargo.lock

@@ -1,0 +1,7 @@
+[package]
+name = "dodge_rock"
+version = "0.1.0"
+authors = ["dettalant <lilac@dettalant.com>"]
+
+[dependencies]
+ggez = "0.4"
