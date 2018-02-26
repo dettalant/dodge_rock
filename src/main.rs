@@ -8,8 +8,8 @@ mod conf;
 mod etc;
 
 fn main() {
-    let conf_path = etc::eazy_path_set("game_config.toml");
-    let conf = conf::GameConf::new(&conf_path);
+    // ゲームの設定読み込みと環境変数指定
+    let conf = conf::GameConf::new("game_config.toml");
 
     // debug modeならtrue、そうでないならfalse
     let is_debug = args::new();

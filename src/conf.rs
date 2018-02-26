@@ -65,8 +65,9 @@ impl GameConf {
     /// 環境変数の呼び出しコードは、`src/conf.rs`冒頭コメントを参照のこと
     ///
     /// `GameConf::new("game_option.toml");` というふうに使う
-    pub fn new<'a>(path: &'a Path) -> Result<Self> {
-        let game_conf = GameConf::toml_serde(path)?;
+    pub fn new<'a>(path_str: &'a str) -> Result<Self> {
+        let conf_path = etc::eazy_path_set(path_str);
+        let game_conf = GameConf::toml_serde(&conf_path)?;
         
         // 各種環境変数への登録
         game_conf.set_to_env_var();
