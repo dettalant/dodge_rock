@@ -11,13 +11,15 @@
   * unused_dir_remove(): ggezが自動生成するフォルダを削除
   * eazy_path_set()    : cargo環境でも通常環境でも適応できるpathをセット
 -------------------------------*/
-extern crate ggez;
 use std;
 use std::path::{ Path, PathBuf };
 use std::io::Result;
 
 // for File Read
 use std::io::{ BufReader, Read };
+
+// for ggez
+use ggez;
 
 pub struct File;
 

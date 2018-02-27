@@ -15,13 +15,40 @@ use std::path::{ PathBuf };
 use std::collections::HashMap;
 use std::io::Result;
 
+use ggez::{ Context, GameResult };
+use ggez::graphics::Image;
+
 use etc;
 
-pub struct Assets;
+
+pub struct Assets {
+    pub player_ship: Image,
+}
 
 impl Assets {
+    pub fn new(ctx: &mut Context) -> GameResult<Self> {
+        let a_map = Assets::set_assets_map()?;
+        let player_ship = Image::new(
+            ctx, 
+            a_map.get("player_ship_64x64.png").unwrap(), // うろおぼえ実装だから後で確認
+        )?; 
+        
+        Ok(Assets {
+            player_ship: player_ship,
+        })
+    }
+    
+    #[allow(dead_code)]
+    /// ファイル読み込みデバッグ用。
+    pub fn debug_new() -> Result<()> {
+        let a_map = Assets::set_assets_map()?;
+        println!("debug_map: {:?}", a_map);
+        Ok(())
+    }
+
     /// assetsフォルダを楽ちんに読み込む
-    pub fn new<'a>() -> Result<HashMap<String, PathBuf>> {
+    pub fn set_assets_map<'a>() -> Result<HashMap<String, PathBuf>> {
+        // assetsフォルダは環境変数で取ってきてるよ
         let assets_path = Assets::set_assets_dir();
         
         // assetsフォルダがなかったらエラーで落とす
@@ -78,6 +105,10 @@ impl Assets {
         let mut dir_tmp = include_dirs;
         let mut base = HashMap::new();
         
+        // プロジェクトフォルダの場所を取り出す
+        let base_path = etc::eazy_path_set("");
+        println!("base_path: {:?}", base_path);
+        
         // 今思うともう少しシンプルに書けたかも
         while dir_tmp.len() > 0 {
             let rdir = std::fs::read_dir(dir_tmp.swap_remove(0))?;
@@ -90,10 +121,25 @@ impl Assets {
                         } else if d.metadata()?.is_file() {
                             let item_name = d.file_name()
                                              .into_string()
-                                             .unwrap();
+                                             .expect("file name -> String変換時のエラー");
+                            /* d.path()からbase_pathを引いて、
+                               assetsフォルダ以降のpathを出す */
+                            /*
+                              ここ、ggezくんが"/foo/bar.png"みたいな指定
+                              じゃないと受け取らないせいでこんがらがってる。
+                              
+                              どうして"foo/bar.png"指定じゃだめなんですか。
+                              仕方がないので、強引に"/foo/bar.png"形式に修正。
+                            */
+                            let mut item_path = PathBuf::from("/");
+                            let tmp_path = d.path()
+                                .strip_prefix(&base_path)
+                                .expect("path切り詰め時のエラー")
+                                .to_path_buf();
+                            item_path.push(&tmp_path);
                             base.insert(
                                 item_name, 
-                                d.path(),
+                                item_path,
                             );
                         } else {
                             // ファイルでもディレクトリでもない場合
