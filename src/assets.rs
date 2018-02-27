@@ -9,9 +9,9 @@
     * set_assets_dir()    : 再帰読み込みを始める親フォルダを指定
     * recursive_read_dir(): 再帰読み込みしたデータをHashmapに放り込む
 -------------------------------*/
-use std;
-use std::env;
-use std::path::{ Path, PathBuf };
+
+use std::{ self, env };
+use std::path::{ PathBuf };
 use std::collections::HashMap;
 use std::io::Result;
 
@@ -78,6 +78,7 @@ impl Assets {
         let mut dir_tmp = include_dirs;
         let mut base = HashMap::new();
         
+        // 今思うともう少しシンプルに書けたかも
         while dir_tmp.len() > 0 {
             let rdir = std::fs::read_dir(dir_tmp.swap_remove(0))?;
             
