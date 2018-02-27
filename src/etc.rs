@@ -3,9 +3,11 @@
 
   カテゴリ分けに困る、
   細々とした関数をひとまとめにする
-  
-  * file_read_to_string: stringとしてファイルを読み取る
-  * file_read_to_vec   : Vec<u8>としてファイルを読み取る
+
+  * impl File
+    * read_to_string   : stringとしてファイルを読み取る
+    * read_to_vec      : Vec<u8>としてファイルを読み取る
+
   * unused_dir_remove(): ggezが自動生成するフォルダを削除
   * eazy_path_set()    : cargo環境でも通常環境でも適応できるpathをセット
 -------------------------------*/
@@ -15,27 +17,49 @@ use std::path::{ Path, PathBuf };
 use std::io::Result;
 
 // for File Read
-use std::fs::File;
 use std::io::{ BufReader, Read };
 
-#[allow(dead_code)]
-/// ファイルをStringとして読み込む
-pub fn file_read_to_string<'a>(path: &'a Path) -> Result<String> {
-    let mut f = BufReader::new(File::open(path)?);
-    let mut out_s = String::new();
-    
-    f.read_to_string(&mut out_s)?;
-    Ok(out_s)
-}
+pub struct File;
 
-#[allow(dead_code)]
-/// ファイルをVec<u8>として読み込む
-pub fn file_read_to_vec<'a>(path: &'a Path) -> Result<Vec<u8>> {
-    let mut f = BufReader::new(File::open(path)?);
-    let mut out_v = Vec::new();
+impl File {
+    #[allow(dead_code)]
+    /// ファイルをStringとして読み込む
+    pub fn read_to_string<'a>(path: &'a Path) -> Result<String> {
+        let mut f = BufReader::new(std::fs::File::open(path)?);
+        let mut out_s = String::new();
+        
+        f.read_to_string(&mut out_s)?;
+        Ok(out_s)
+    }
+
+    #[allow(dead_code)]
+    /// ファイルをVec<u8>として読み込む
+    pub fn read_to_vec<'a>(path: &'a Path) -> Result<Vec<u8>> {
+        let mut f = BufReader::new(std::fs::File::open(path)?);
+        let mut out_v = Vec::new();
+        
+        f.read_to_end(&mut out_v)?;
+        Ok(out_v)
+    }
     
-    f.read_to_end(&mut out_v)?;
-    Ok(out_v)
+    /// ディレクトリ内ファイル数を判定して、空ディレクトリなら削除
+    pub fn empty_dir_remove<'a>(path: &'a Path) -> Result<()> {
+        /*
+          for文を回してファイル数計測
+          絶対もっと良い方法あると思う（白目）
+        */
+        let mut cnt = 0;
+        for _ in std::fs::read_dir(path)? {
+            cnt += 1;
+        }
+        
+        // ディレクトリ内に何もなかったらcntが0になる
+        if cnt == 0 {
+            std::fs::remove_dir(path)?;
+        }
+        
+        Ok(())
+    }
 }
 
 #[allow(dead_code)]
@@ -44,14 +68,17 @@ pub fn unused_dir_remove(ctx: &mut ggez::Context) -> ggez::GameResult<()> {
     let user_conf_dir_path = ctx.filesystem.get_user_config_dir();
     let user_data_dir_path = ctx.filesystem.get_user_data_dir();
 
-    // だいじょうぶだろうけど、一応エラー処理しておく
-
+    /* 
+      let _ = std::fs::remove_dir()で問題ないことは知ってるけど、
+      捨てていてもエラーを出すのは気になるの！
+    */
+    
     if user_conf_dir_path.is_dir() {
-        std::fs::remove_dir(user_conf_dir_path)?;
+        File::empty_dir_remove(user_conf_dir_path)?;
     }
 
     if user_data_dir_path.is_dir() {
-        std::fs::remove_dir(user_data_dir_path)?;
+        File::empty_dir_remove(user_data_dir_path)?;
     }
 
     Ok(())

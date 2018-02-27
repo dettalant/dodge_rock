@@ -29,7 +29,7 @@
   "GAME_TRANSLATE_DATA_DIR"が空か否かで判定すること。
   
 -------------------------------*/
-use std;
+//use std;
 use std::io::Result;
 use std::path::Path;
 
@@ -78,7 +78,7 @@ impl GameConf {
     /// 内部用。tomlファイルを読み込んで、解析する関数を呼び出す
     fn toml_serde<'a>(path: &'a Path) -> Result<Self> {
         // 効率化のためにVec<u8>で受け取るようにするか
-        let tmp_vec = etc::file_read_to_vec(path)?;
+        let tmp_vec = etc::File::read_to_vec(path)?;
         let out_data = toml::de::from_slice(&tmp_vec).expect("Toml deserialize 時のエラー");
         Ok(out_data)
     }
