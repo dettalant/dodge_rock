@@ -4,74 +4,102 @@
   起動引数を取得して、
   場合に応じたオプションをつける
   
-  * print_usage()
-    * ヘルプ表示用の関数
-  * print_version()
-    * version表示用の関数
-  * new()
-    * 現状ではデバッグモード用の関数
+  * print_usage()  : ヘルプ表示用の関数
+  * print_version(): version表示用の関数
+  * impl Args
+    * new()        : 外部から呼び出す関数。内部でargs_check()を呼ぶ。
+    * default()    : struct Argsを初期化するやつ
+    * args_check() : env::args()の値を見て、適切なモードを指定する
+  
+  * struct Args
+    * flag_debug   : debug modeかどうかを判定する変数
+
 -------------------------------*/
 use std;
 
-const USAGE: &'static str = "USAGE
-dodge rock game
+const USAGE: &'static str = "  \
+  Description:
+    dodge rock game
+  
+  USAGE:
+    dodge_rock (-h | --help)
+    dodge_rock (-v | --version)
+    dodge_rock (-d | --debug)
 
-dodge_rock (-h | --help)
-dodge_rock (-v | --version)
-dodge_rock (-d | --debug)
-
-Options:
-  -h --help     Show this screen.
-  -v --version  Show version.
-  -d --debug    Run game with debug mode.
-";
+  Options:
+    -h --help     Show this screen.
+    -v --version  Show version.
+    -d --debug    Run game with debug mode.";
 
 // build時にCargo.tomlから名前とバージョンを組み込ませる
 const OWN_NAME: &'static str = env!("CARGO_PKG_NAME");
 const OWN_VERSION: &'static str = env!("CARGO_PKG_VERSION");
 
-/// helpを表示
+/// USAGEメッセージを表示。内部用。
 fn print_usage() {
     println!("{}", USAGE);
 }
 
-/// versionを表示
+/// versionを表示。内部用。
 fn print_version() {
     println!("{} v{}", OWN_NAME, OWN_VERSION);
 }
 
-/// 起動引数の読み込みと分析
-pub fn new() -> bool {
-    // 引数なしの場合は早期終了、エラー回避。
-    if std::env::args().len() == 1 {
-        println!("引数なしの通常モード");
-        return false;
+#[derive(Debug)]
+pub struct Args {
+    pub flag_debug: bool,
+}
+
+// なんか変な動きなので、一時凍結
+impl Default for Args {
+    fn default() -> Self {
+        Args {
+            flag_debug: false,
+        }
+    }
+}
+
+impl Args {
+    /// 起動引数の読み込みと分析
+    pub fn new() -> Self {
+        // Args struct用の各種変数初期化
+        let mut args = Args::default();
+
+        // 引数なしの場合は早期終了、エラー回避。
+        if std::env::args().len() == 1 {
+            println!("引数なしの通常モード");
+        } else {
+            args.args_check();
+        }
+        
+        args
     }
     
-    let args: Vec<String> = std::env::args().skip(1).collect();
-    let first_arg = args[0].as_str();
-    
-    let is_debug = match first_arg {
-        "-h" | "--help" => {
-            print_usage();
-            std::process::exit(0);
-        }
+    /// 内部用。env::args()を見て、適切な引数が使われていたら作動する。
+    fn args_check(&mut self) {
+        // 起動引数を取得
+        let env_args: Vec<String> = std::env::args().skip(1).collect();
+        let first_arg = env_args[0].as_str();
         
-        "-v" | "--version" => {
-            print_version();
-            std::process::exit(0);
-        }
-        
-        "-d" | "--debug" => {
-            println!("でばっぐもーど");
-            true
-        }
-        
-        _ => {
-            println!("通常起動");
-            false
-        }
-    };
-    
-    is_debug
+        match first_arg {
+            "-h" | "--help" => {
+                print_usage();
+                std::process::exit(0);
+            }
+            
+            "-v" | "--version" => {
+                print_version();
+                std::process::exit(0);
+            }
+            
+            "-d" | "--debug" => {
+                println!("でばっぐもーど");
+                self.flag_debug = true;
+            }
+            
+            _ => {
+                println!("通常起動");
+            }
+        } // match end
+    }
 }
