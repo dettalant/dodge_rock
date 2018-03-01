@@ -15,6 +15,7 @@ mod assets;
 mod conf;
 mod core_state;
 mod etc;
+mod input_state;
 mod view;
 
 use core_state::CoreState;
@@ -38,7 +39,7 @@ fn ggez_init() {
     
     let ctx = &mut cb.build().expect("ggez ContextBuilderのエラー");
     
-    // .configと.localにゴミフォルダ作るのやめてよggezくん
+    // 了承なく.configと.localにフォルダ作るのやめてよggezくん
     let _ = etc::unused_dir_remove(ctx);
     
     match CoreState::new(ctx) {
