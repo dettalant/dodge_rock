@@ -13,9 +13,9 @@ use ggez::event::{ Keycode, Mod };
 /// ユーザー操作に対して、どういう効果をもたせるか
 /// 基本的に0で動作を止めて、それ以外で動かす。
 pub struct InputState {
-    /// 上下移動。1で上、-1で下に移動。
+    /// 上下移動。-1で上、1で下に移動。
     pub v_move: i8,
-    /// 左右移動。1で左、-1で右に移動。
+    /// 左右移動。-1で左、1で右に移動。
     pub h_move: i8, 
 }
 
@@ -59,17 +59,17 @@ impl InputState {
           アナログ入力にも対応できるように、boolでない方法を使う
           
           キー入力がある時:
-          上, 左 == 1
-          下, 右 == -1
+          下, 右 == 1
+          上, 左 == -1
           
           キー入力がない時:
           上下左右 == 0
         */
         match keycode {
-            Keycode::Up => self.v_move = pressed.abs(),
-            Keycode::Down => self.v_move = -pressed.abs(),
-            Keycode::Left => self.h_move = pressed.abs(),
-            Keycode::Right => self.h_move = -pressed.abs(),
+            Keycode::Up => self.v_move = -pressed,
+            Keycode::Down => self.v_move = pressed,
+            Keycode::Left => self.h_move = -pressed,
+            Keycode::Right => self.h_move = pressed,
             _ => (), // Do nothing
         }
     }

@@ -107,7 +107,6 @@ impl Assets {
         
         // プロジェクトフォルダの場所を取り出す
         let base_path = etc::eazy_path_set("");
-        println!("base_path: {:?}", base_path);
         
         // 今思うともう少しシンプルに書けたかも
         while dir_tmp.len() > 0 {

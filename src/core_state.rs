@@ -8,11 +8,12 @@
 
 // use ggez::{ graphics };
 use ggez::{ Context, GameResult};
-use ggez::graphics::{ Point2 };
+//use ggez::graphics::{ Point2 };
 use ggez::event::{ EventHandler, Keycode, Mod };
 
 use assets;
 use input_state::InputState;
+use game_state::GameState;
 use view;
 
 /// ゲームに使用する変数を一つにまとめる
@@ -21,16 +22,16 @@ pub struct CoreState {
     pub assets: assets::Assets,
     /// ユーザー操作をinputとして受ける
     pub input: InputState,
-    pub test_pos: Point2, // デバッグ用。あとで消す
+    /// ゲーム内で使う変数まとめ
+    pub game_state: GameState,
 }
 
 impl CoreState {
     pub fn new(ctx: &mut Context) -> GameResult<CoreState> {
-        let test_pos = Point2::new(200.0, 200.0);
         Ok(CoreState {
             assets: assets::Assets::new(ctx)?,
             input: InputState::new(),
-            test_pos: test_pos,
+            game_state: GameState::new(),
         })
     }
 }
@@ -43,8 +44,9 @@ impl EventHandler for CoreState {
             println!("v_move: {}, h_move: {}",
                      self.input.v_move,
                      self.input.h_move);
+            println!("game_state: {:?}", self.game_state);
         }
-        
+        self.game_state.main_game_system_loop(&self.input);
         Ok(())
     }
     
