@@ -9,7 +9,7 @@
 // use ggez::{ graphics };
 use ggez::{ Context, GameResult};
 //use ggez::graphics::{ Point2 };
-use ggez::event::{ EventHandler, Keycode, Mod };
+use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
 use assets;
 use input_state::InputState;
@@ -18,6 +18,8 @@ use view;
 
 /// ゲームに使用する変数を一つにまとめる
 pub struct CoreState {
+    /// ウィンドウがアクティブになっているか否か
+    pub has_focus: bool,
     /// ゲームアセットをひとまとめ
     pub assets: assets::Assets,
     /// ユーザー操作をinputとして受ける
@@ -29,6 +31,7 @@ pub struct CoreState {
 impl CoreState {
     pub fn new(ctx: &mut Context) -> GameResult<CoreState> {
         Ok(CoreState {
+            has_focus: false,
             assets: assets::Assets::new(ctx)?,
             input: InputState::new(),
             game_state: GameState::new(),
@@ -38,15 +41,9 @@ impl CoreState {
 
 impl EventHandler for CoreState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        
-        // 完全にデバッグ用、後で消す
-        if self.input.v_move != 0 || self.input.h_move != 0 {
-            println!("v_move: {}, h_move: {}",
-                     self.input.v_move,
-                     self.input.h_move);
-            println!("game_state: {:?}", self.game_state);
+        if self.has_focus {
+            self.game_state.main_game_system_loop(&self.input);
         }
-        self.game_state.main_game_system_loop(&self.input);
         Ok(())
     }
     
@@ -71,4 +68,40 @@ impl EventHandler for CoreState {
                     _repeat: bool) {
         self.input.key_release(keycode, keymod);
     }
+    
+    fn controller_button_down_event(&mut self, _ctx: &mut Context, btn: Button, instance_id: i32) {
+        // このゲームはおひとりさま専用でありんす
+        if instance_id == 0 {
+            self.input.pad_press(btn);
+        }
+    }
+
+    fn controller_button_up_event(&mut self, _ctx: &mut Context, btn: Button, instance_id: i32) {
+        // このゲームはおひとりさま専用(ry
+        if instance_id == 0 {
+            self.input.pad_release(btn);
+        }
+    }
+
+    fn controller_axis_event(&mut self,
+                             _ctx: &mut Context,
+                             axis: Axis,
+                             value: i16,
+                             instance_id: i32) {
+
+        if instance_id == 0 {
+            self.input.axis_controll(axis, value);
+        }
+    }
+
+
+    fn focus_event(&mut self, _ctx: &mut Context, gained: bool) {
+        if gained {
+            self.has_focus = true;
+        } else {
+            self.has_focus = false;
+        }
+    }
 }
+
+
