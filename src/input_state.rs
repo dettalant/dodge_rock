@@ -6,6 +6,19 @@
   ゲーム内処理についてはgame_state.rsを、
   画面描画についてはview.rsを参照のこと。
 
+  * struct InputState: キー入力が行われてるかのboolを貯めることにする
+  
+  * impl InputState: キー入力を適切な形で検知したい
+    * default(): 初期化用のアレ
+    * new(): default()を呼ぶ初期化
+    * key_press()  : キーが押下されている場合の。バグがあるから修正したい。
+    * key_release(): キーが放上された際の。バグがあるから修正したい。
+    * pad_press()  : ゲームパッドボタンが押下された際の。なぜか上手く動く。
+    * pad_release(): ゲームパッドボタンが放上された際の。なぜか動く。
+    * axis_controll(): アナログスティックの管理。うまく動く。
+    * user_key_controll(): 入力信号を変数へと変換する。キーボード用。
+    * user_pad_controll(): 入力信号を変数へと変換する。ゲームパッド用。
+
 -------------------------------*/
 
 use ggez::event::{ Axis, Button, Keycode, Mod };

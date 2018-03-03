@@ -6,6 +6,8 @@
   
   * Assets impl
     * new()               : 親フォルダ名から一括でデータ出力。外部用。
+    * debug_new()         : デバッグに役立つ簡易版
+    * set_assets_map()    : 再帰読み込みした結果物を出力するやつ
     * set_assets_dir()    : 再帰読み込みを始める親フォルダを指定
     * recursive_read_dir(): 再帰読み込みしたデータをHashmapに放り込む
 -------------------------------*/
@@ -17,12 +19,14 @@ use std::io::Result;
 
 use ggez::{ Context, GameResult };
 use ggez::graphics::Image;
+use ggez::audio;
 
 use etc;
 
 
 pub struct Assets {
     pub player_ship: Image,
+    pub test_bgm: audio::Source,
 }
 
 impl Assets {
@@ -33,8 +37,14 @@ impl Assets {
             a_map.get("player_ship_64x64.png").unwrap(), // うろおぼえ実装だから後で確認
         )?; 
         
+        let test_bgm = audio::Source::new(
+            ctx,
+            a_map.get("game_breaker.ogg").unwrap(),
+        )?;
+        
         Ok(Assets {
             player_ship: player_ship,
+            test_bgm: test_bgm,
         })
     }
     

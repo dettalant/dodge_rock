@@ -5,7 +5,9 @@
   
   まとめた関数を、core_state.rsのggez EventHandlerに渡す
   ゲーム内処理についてはgame_state.rsを参照のこと
-
+    
+  * render_game  : ゲームの状況に合わせて、適切な部分を描画するおまとめ関数
+  * render_player: プレイヤー周りを描画する
 -------------------------------*/ 
 use ggez::{ Context, GameResult };
 use ggez::graphics::{ self, Point2 };

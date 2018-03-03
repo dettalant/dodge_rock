@@ -3,7 +3,19 @@
 
   ユーザー入力の受け取り方をここで決めて、
   InputStateの形でまとめる。
-
+  
+  * impl CoreState: ゲームのガワを包む皮
+    * new(): よくある初期化のやつ
+  
+  * Eventhandler for CoreState: ggezのイベントハンドラ
+    * update()        : 多分描画した後の更新関連
+    * draw()          : 画面を描画する系
+    * key_down_event(): キーボードを押下した際のもの
+    * key_up_event()  : キーボードを離した際のもの
+    * controller_button_down_event(): コントローラー版押下
+    * controller_button_up_event()  : コントローラー版放上
+    * controller_axis_event: アナログスティックの動きを検知
+    * focus_event: ウィンドウがアクティブになっているかを検知
 -------------------------------*/ 
 
 // use ggez::{ graphics };
@@ -42,8 +54,9 @@ impl CoreState {
 impl EventHandler for CoreState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         if self.has_focus {
-            self.game_state.main_game_system_loop(&self.input);
-        }
+            self.game_state.main_game_system_loop(&self.input)?;
+        } 
+        
         Ok(())
     }
     
