@@ -101,7 +101,6 @@ impl EventHandler for CoreState {
                              axis: Axis,
                              value: i16,
                              instance_id: i32) {
-
         if instance_id == 0 {
             self.input.axis_controll(axis, value);
         }

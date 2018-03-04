@@ -23,6 +23,7 @@
 
 use ggez::event::{ Axis, Button, Keycode, Mod };
 
+#[derive(Default)]
 /// ユーザー操作に対して、どういう効果をもたせるか
 /// 基本的に0で動作を止めて、それ以外で動かす。
 ///
@@ -32,26 +33,25 @@ use ggez::event::{ Axis, Button, Keycode, Mod };
 /// 0がニュートラルで、上に行けば-にいって、下に行けば+に行く。
 /// アナログスティックの動きと、方向キーの数値を合わせる。
 pub struct InputState {
-    /// 上下移動。-で上、+で下に移動。
-    pub v_move: i16,
-    /// 左右移動。-で左、+で右に移動。
-    pub h_move: i16,
-}
-
-/// InputStateの変数初期化。
-impl Default for InputState {
-    fn default() -> InputState {
-        InputState {
-            v_move: 0,
-            h_move: 0,
-        }
-    }
+    /// 左アナログスティックの横軸
+    pub axis_lx: i16,
+    /// 左アナログスティックの縦軸
+    pub axis_ly: i16,
+    /// 十字キー上
+    pub move_up: bool,
+    /// 十字キー下
+    pub move_down: bool,
+    /// 十字キー左
+    pub move_left: bool,
+    /// 十字キー右
+    pub move_right: bool,
 }
 
 impl InputState {
     /// InputStateの初期化を行う
     pub fn new() -> InputState {
-        InputState::default()
+        let input: InputState = Default::default();
+        input
     }
     
     /// キーが押されたら、入力信号をオン(1)に
@@ -82,11 +82,10 @@ impl InputState {
     
     // アナログスティック入力を振り分ける
     pub fn axis_controll(&mut self, axis: Axis, value: i16) {
-        // 現状はテスト用
         
         match axis {
-            Axis::LeftX => self.h_move = value,
-            Axis::LeftY => self.v_move = value,
+            Axis::LeftX => self.axis_lx = value,
+            Axis::LeftY => self.axis_ly = value,
             _ => (),
         }
         
@@ -98,26 +97,20 @@ impl InputState {
                          pressed: bool) {
         /*
           キーごとに反応を返す
-          変数を少なくしようとboolで無い方法使ったけど、
-          ちょっと失策だったかも。
+          愚直にboolを使うことにした
           
-          キー入力がある時:
-          下, 右 == 1
-          上, 左 == -1
-          
+          ボタン入力がある時:
+          上下左右 == true
+        
           キー入力がない時:
-          上下左右 == 0
+          上下左右 == false
         */
-        let mut value = 0_i16;
-        if pressed {
-            value = 32767_i16;
-        }
         
         match keycode {
-            Keycode::Up => self.v_move = -value,
-            Keycode::Down => self.v_move = value,
-            Keycode::Left => self.h_move = -value,
-            Keycode::Right => self.h_move = value,
+            Keycode::Up => self.move_up = pressed,
+            Keycode::Down => self.move_down = pressed,
+            Keycode::Left => self.move_left = pressed,
+            Keycode::Right => self.move_right = pressed,
             _ => (), // Do nothing
         }
     }
@@ -130,25 +123,18 @@ impl InputState {
           とりあえずわかりやすいボタンに対するやつ
           ggezの仕様的に、xbox360コン準拠。
           
-          Axis入力についてはどないすっかな。
-          
           ボタン入力がある時:
-          下, 右 == 1
-          上, 左 == -1
+          上下左右 == true
         
           キー入力がない時:
-          上下左右 == 0
+          上下左右 == false
         */
-        let mut value = 0_i16;
-        if pressed {
-            value = 32767_i16;
-        }
         
         match btn {
-            Button::DPadUp => self.v_move = -value,
-            Button::DPadDown => self.v_move = value,
-            Button::DPadLeft => self.h_move = -value,
-            Button::DPadRight => self.h_move = value,
+            Button::DPadUp => self.move_up = pressed,
+            Button::DPadDown => self.move_down = pressed,
+            Button::DPadLeft => self.move_left = pressed,
+            Button::DPadRight => self.move_right = pressed,
             _ => (), // Do nothing
         }
     }
