@@ -23,7 +23,6 @@ use ggez::audio;
 
 use etc;
 
-
 pub struct Assets {
     pub player_ship: Image,
     pub test_bgm: audio::Source,

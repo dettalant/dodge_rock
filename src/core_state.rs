@@ -42,11 +42,14 @@ pub struct CoreState {
 
 impl CoreState {
     pub fn new(ctx: &mut Context) -> GameResult<CoreState> {
+        let assets = assets::Assets::new(ctx)?;
+        let game_state = GameState::new(ctx, &assets);
+        
         Ok(CoreState {
             has_focus: false,
-            assets: assets::Assets::new(ctx)?,
+            assets: assets,
             input: InputState::new(),
-            game_state: GameState::new(),
+            game_state: game_state,
         })
     }
 }
@@ -63,6 +66,7 @@ impl EventHandler for CoreState {
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         // ゲーム描画のおまとめ関数
         view::render_game(self, ctx)?;
+        
         Ok(())
     }
     

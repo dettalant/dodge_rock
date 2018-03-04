@@ -6,27 +6,35 @@
     
   * struct Player: プレイヤーキャラについて。また今度別の場所に移したい
   * struct Actor : 意識を持つようにして動くもの。また今度別の場所に移したい。
+  * struct System: ゲームシステムに影響を持つ変数はここに。
   
   * impl GameState: ゲーム内システム進行について
     * new(): よくある初期化
     * main_game_system_loop(): メインゲームループを扱う
     * player_move(): 自機移動についてのもろもろ
+    * player_collision_check(): 自機が画面外に出ないようにする（また今度当たり判定も取る）
   
   * axis_move()   : アナログスティック操作変数を、画面描画に役立つ形に直す
   * key_move()    : 十字キー操作変数を、画面描画に役立つ形に直す
   * player_move_speed(): いつかゲーム内から速度調整するためのバッファ
 -------------------------------*/ 
-use ggez::GameResult;
+use ggez::{Context, GameResult};
+
+use assets;
 use input_state::InputState;
 
 // また今度別ファイルに移行させたい
 // 今は簡易版として、とりあえず形だけ作る
 #[derive(Debug, Default)]
 pub struct Player {
-    /// 左右
+    /// 左右初期値
     pub x: f32,
-    /// 上下
+    /// 上下初期値
     pub y: f32,
+    /// 自機画像横幅
+    pub width: u32,
+    /// 自機画像縦幅
+    pub height: u32,
 }
 
 #[derive(Debug)]
@@ -35,9 +43,33 @@ pub struct Actor {
 }
 
 impl Actor {
-    pub fn new() -> Actor {
+    pub fn new(assets: &assets::Assets,
+               system: &System) -> Actor {
+        let player = Player {
+            x: (system.window_w - assets.player_ship.width()) as f32 / 2_f32,
+            y: system.window_h as f32 * 0.7,
+            width: assets.player_ship.width(),
+            height: assets.player_ship.height(),
+        };
+        
         Actor {
-            player: Player { x: 200_f32, y: 200_f32 }, // 雑な配置 
+            player: player, // 雑な配置 
+        }
+    }
+}
+
+#[derive(Debug)]
+/// ゲームシステムと関係する変数をここに入れる
+pub struct System {
+    pub window_h: u32,
+    pub window_w: u32,
+}
+
+impl System {
+    fn new(ctx: &mut Context) -> System {
+        System {
+            window_w: ctx.conf.window_mode.width,
+            window_h: ctx.conf.window_mode.height,
         }
     }
 }
@@ -45,23 +77,29 @@ impl Actor {
 #[derive(Debug)]
 pub struct GameState {
     pub actor: Actor,
+    pub system: System,
 }
 
 impl GameState {
-    pub fn new() -> GameState {
+    pub fn new(ctx: &mut Context, assets: &assets::Assets) -> GameState {
+        let system = System::new(ctx);
+        let actor = Actor::new(assets, &system);
         GameState {
-            actor: Actor::new(),
+            actor: actor,
+            system: system,
         }
     }
     
+    /// メインのゲーム画面を管理するやつ 
     pub fn main_game_system_loop(&mut self, input: &InputState) -> GameResult<()>{
         // 自機移動
         self.player_move(input);
+        self.player_collision_check();
         
         Ok(())
     }
     
-    // 自機移動をまとめる関数
+    /// 自機移動をまとめる関数
     fn player_move(&mut self, input: &InputState) {
         if input.axis_lx != 0 || input.axis_ly != 0 {
             self.actor.player.x += axis_move(input.axis_lx);
@@ -96,6 +134,31 @@ impl GameState {
                 input.move_left, 
                 input.move_right
             ) * tmp_n;
+        }
+    }
+    
+    // 自機が画面外に出ないようにチェック
+    fn player_collision_check(&mut self) {
+        // 暫定として適当に配置
+        
+        // 横軸画面端計算
+        if self.actor.player.x.is_sign_positive() {
+            let tmp_n = (self.system.window_w - self.actor.player.width) as f32;
+            if self.actor.player.x > tmp_n {
+                self.actor.player.x = tmp_n;
+            }
+        } else {
+            self.actor.player.x = 0_f32;
+        }
+        
+        // 縦軸画面端計算
+        if self.actor.player.y.is_sign_positive() {
+            let tmp_n = (self.system.window_h - self.actor.player.height) as f32;
+            if self.actor.player.y > tmp_n {
+                self.actor.player.y = tmp_n;
+            }
+        } else {
+            self.actor.player.y = 0_f32;
         }
     }
 }
