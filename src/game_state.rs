@@ -91,7 +91,7 @@ impl GameState {
     }
     
     /// メインのゲーム画面を管理するやつ 
-    pub fn main_game_system_loop(&mut self, input: &InputState) -> GameResult<()>{
+    pub fn main_game_mode(&mut self, input: &InputState) -> GameResult<()>{
         // 自機移動
         self.player_move(input);
         self.player_collision_check();

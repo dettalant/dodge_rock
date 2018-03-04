@@ -60,8 +60,8 @@ fn ggez_init() {
 }
 
 fn main() {
-    // 起動引数にもどつく起動モードを取得
-    let _args = args::Args::new();
+    // 起動引数に基づく起動モードを指定
+    args::Args::new();
 
     // ゲームの設定読み込みと環境変数指定
     let _conf = conf::GameConf::new("game_config.toml");

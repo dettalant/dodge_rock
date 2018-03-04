@@ -16,7 +16,10 @@
     * controller_button_up_event()  : コントローラー版放上
     * controller_axis_event: アナログスティックの動きを検知
     * focus_event: ウィンドウがアクティブになっているかを検知
+  
+  * print_debug: 起動時に一度のみデバッグモード文章を表示する
 -------------------------------*/ 
+use std::env;
 
 // use ggez::{ graphics };
 use ggez::{ Context, GameResult};
@@ -45,6 +48,11 @@ impl CoreState {
         let assets = assets::Assets::new(ctx)?;
         let game_state = GameState::new(ctx, &assets);
         
+        // "-d"引数を付けて起動した際のデバッグモード
+        if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
+            print_debug(ctx, &game_state);
+        }
+        
         Ok(CoreState {
             has_focus: false,
             assets: assets,
@@ -57,7 +65,7 @@ impl CoreState {
 impl EventHandler for CoreState {
     fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
         if self.has_focus {
-            self.game_state.main_game_system_loop(&self.input)?;
+            self.game_state.main_game_mode(&self.input)?;
         } 
         
         Ok(())
@@ -120,4 +128,31 @@ impl EventHandler for CoreState {
     }
 }
 
-
+/// デバッグモードの際に、たまに参照したくなるデータを表示する
+fn print_debug(ctx: &mut Context, 
+               game_state: &GameState) {
+    let translate_dir = match env::var("GAME_TRANSLATE_DATA_DIR") {
+        Ok(s) => s,
+        Err(_) => "未指定(translateフラグがオフ)".to_string(),
+    };
+    
+    let debug_text = format!("    \
+    でばっぐもーど
+  Window Size            : {} x {}
+  Vsync                  : {}
+  GAME_ACTIVATE_MODE     : {}
+  GAME_ASSETS_DIR        : {}
+  GAME_TRANSLATE_DATA_DIR: {}
+  
+  struct game_state      : {:?}
+",  
+        ctx.conf.window_mode.width,
+        ctx.conf.window_mode.height,
+        ctx.conf.window_mode.vsync,
+        env::var("GAME_ACTIVATE_MODE").unwrap(),
+        env::var("GAME_ASSETS_DIR").unwrap(),
+        translate_dir,
+        game_state,);
+    
+    println!("{}", debug_text);
+}
