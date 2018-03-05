@@ -4,6 +4,8 @@
   ユーザー入力の受け取り方をここで決めて、
   InputStateの形でまとめる。
   
+  * const DESIRED_FPS: 固定FPSの数値（60fps）
+  
   * impl CoreState: ゲームのガワを包む皮
     * new(): よくある初期化のやつ
   
@@ -21,9 +23,8 @@
 -------------------------------*/ 
 use std::env;
 
-// use ggez::{ graphics };
+use ggez::{ timer };
 use ggez::{ Context, GameResult};
-//use ggez::graphics::{ Point2 };
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
 use assets;
@@ -42,6 +43,9 @@ pub struct CoreState {
     /// ゲーム内で使う変数まとめ
     pub game_state: GameState,
 }
+
+// 固定FPSの数値
+const DESIRED_FPS: u32 = 60;
 
 impl CoreState {
     pub fn new(ctx: &mut Context) -> GameResult<CoreState> {
@@ -63,11 +67,12 @@ impl CoreState {
 }
 
 impl EventHandler for CoreState {
-    fn update(&mut self, _ctx: &mut Context) -> GameResult<()> {
-        if self.has_focus {
-            self.game_state.main_game_mode(&self.input)?;
-        } 
-        
+    fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
+        while timer::check_update_time(ctx, DESIRED_FPS) {        
+            if self.has_focus {
+                self.game_state.main_game_mode(&self.input)?;
+            } 
+        }
         Ok(())
     }
     
@@ -140,6 +145,7 @@ fn print_debug(ctx: &mut Context,
     でばっぐもーど
   Window Size            : {} x {}
   Vsync                  : {}
+  Constant Frame rate    : {}
   GAME_ACTIVATE_MODE     : {}
   GAME_ASSETS_DIR        : {}
   GAME_TRANSLATE_DATA_DIR: {}
@@ -149,10 +155,11 @@ fn print_debug(ctx: &mut Context,
         ctx.conf.window_mode.width,
         ctx.conf.window_mode.height,
         ctx.conf.window_mode.vsync,
+        DESIRED_FPS,
         env::var("GAME_ACTIVATE_MODE").unwrap(),
         env::var("GAME_ASSETS_DIR").unwrap(),
         translate_dir,
-        game_state,);
+        game_state);
     
     println!("{}", debug_text);
 }
