@@ -45,6 +45,9 @@ pub struct InputState {
     pub move_left: bool,
     /// 十字キー右
     pub move_right: bool,
+    /// デバッグ用
+    pub key_d: bool,
+    pub key_m: bool,
 }
 
 impl InputState {
@@ -108,10 +111,12 @@ impl InputState {
         */
         
         match keycode {
-            Keycode::Up => self.move_up = pressed,
-            Keycode::Down => self.move_down = pressed,
-            Keycode::Left => self.move_left = pressed,
+            Keycode::Up    => self.move_up = pressed,
+            Keycode::Down  => self.move_down = pressed,
+            Keycode::Left  => self.move_left = pressed,
             Keycode::Right => self.move_right = pressed,
+            Keycode::D     => self.key_d = pressed,
+            Keycode::M     => self.key_m = pressed,
             _ => (), // Do nothing
         }
     }

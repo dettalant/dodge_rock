@@ -75,7 +75,8 @@ impl EventHandler for CoreState {
             // ウィンドウがアクティブな際のみ更新させる
             if self.has_focus {
                 self.game_state.main_game_mode(&self.input)?;
-            } 
+                //self.game_state.bgm_tuner(&self.assets)?;
+            }
         }
         Ok(())
     }

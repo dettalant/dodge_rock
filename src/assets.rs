@@ -27,6 +27,7 @@ use conf::GameConf;
 pub struct Assets {
     pub player_ship: Image,
     pub test_bgm: audio::Source,
+    pub no_sound: audio::Source,
 }
 
 impl Assets {
@@ -34,7 +35,7 @@ impl Assets {
         let a_map = Assets::set_assets_map(conf)?;
         let player_ship = Image::new(
             ctx, 
-            a_map.get("player_ship_64x64.png").unwrap(), // うろおぼえ実装だから後で確認
+            a_map.get("player_ship_39x64.png").unwrap(), // うろおぼえ実装だから後で確認
         )?; 
         
         let test_bgm = audio::Source::new(
@@ -42,9 +43,15 @@ impl Assets {
             a_map.get("game_breaker.ogg").unwrap(),
         )?;
         
+        let no_sound = audio::Source::new(
+            ctx,
+            a_map.get("no_sound_3s.wav").unwrap(),
+        )?;
+        
         Ok(Assets {
             player_ship: player_ship,
             test_bgm: test_bgm,
+            no_sound: no_sound,
         })
     }
     

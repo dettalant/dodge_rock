@@ -18,6 +18,7 @@
   * key_move()    : 十字キー操作変数を、画面描画に役立つ形に直す
   * player_move_speed(): いつかゲーム内から速度調整するためのバッファ
 -------------------------------*/ 
+use std;
 use ggez::{Context, GameResult};
 
 use assets;
@@ -63,6 +64,11 @@ impl Actor {
 pub struct System {
     pub window_h: u32,
     pub window_w: u32,
+    /// 現在選択されているBGM番号
+    pub current_bgm: u8,
+    /// BGMを鳴らすか否か
+    pub is_bgm: bool,
+    pub is_bgm_paused: bool,
 }
 
 impl System {
@@ -70,6 +76,9 @@ impl System {
         System {
             window_w: ctx.conf.window_mode.width,
             window_h: ctx.conf.window_mode.height,
+            current_bgm: 1,
+            is_bgm: true,
+            is_bgm_paused: false,
         }
     }
 }
@@ -160,6 +169,74 @@ impl GameState {
         } else {
             self.actor.player.y = 0_f32;
         }
+    }
+    
+    #[allow(dead_code)]
+    pub fn change_bgm(&mut self, bgm_number: u8) {
+        self.stop_bgm();
+        let one_millis = std::time::Duration::from_millis(1000);
+        std::thread::sleep(one_millis);
+        
+        self.system.current_bgm = bgm_number;
+        self.play_bgm();
+    }
+    
+    #[allow(dead_code)]    
+    pub fn play_bgm(&mut self) {
+        self.system.is_bgm = true;
+    }
+    
+    #[allow(dead_code)]    
+    pub fn pause_bgm(&mut self) {
+        self.system.is_bgm_paused = true;
+        self.system.is_bgm = false;
+    }
+    
+    #[allow(dead_code)]
+    pub fn stop_bgm(&mut self) {
+        self.system.is_bgm_paused = false;
+        self.system.is_bgm = false;
+    }
+    
+    /// ゲーム場面に応じたBGMを再生する
+    pub fn bgm_tuner(&self, 
+                    assets: &assets::Assets) -> GameResult<()> {
+        {
+            // テスト領域
+            //println!("is_bgm: {}, is_bgm_paused: {},\
+            //current_bgm: {}",
+                //self.system.is_bgm,
+                //self.system.is_bgm_paused,
+                //self.system.current_bgm);
+        }
+        
+        // tmp_m変数にassetsの変数を束縛して、多様なトラックを一つの手段でかける
+        // 要するに曲番号一覧ってこと。
+        let tmp_m = match self.system.current_bgm {
+            0 => &assets.no_sound,
+            1 => &assets.test_bgm,
+            _ => &assets.no_sound,
+        };
+        
+        // ここ、マクロを使ってもう少しまともな形にしたい
+        if self.system.is_bgm {
+            // 1だとtest_bgmを再生
+            if tmp_m.paused() {
+                tmp_m.resume();
+            } else if tmp_m.stopped() {
+                tmp_m.play()?;
+            }
+        } else if self.system.is_bgm_paused && !self.system.is_bgm {
+            if tmp_m.playing() {
+                tmp_m.pause();
+            }
+        } else if !self.system.is_bgm {
+            if !tmp_m.stopped() {
+                tmp_m.stop();
+            }
+        }
+        
+        Ok(())
     }
 }
 
