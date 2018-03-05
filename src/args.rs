@@ -6,10 +6,11 @@
   
   * print_usage()  : ヘルプ表示用の関数
   * print_version(): version表示用の関数
+  
   * impl Args
-    * new()        : 外部から呼び出す関数。内部でargs_check()を呼ぶ。
-    * default()    : struct Argsを初期化するやつ
-    * args_check() : env::args()の値を見て、適切なモードを指定する
+    * new()           : 外部から呼び出す関数。内部でargs_check()を呼ぶ。
+    * args_check()    : env::args()の値を見て、適切なモードを指定する
+    * set_to_env_var(): デバッグモードかどうかを、環境変数に指定する
   
   * struct Args
     * flag_debug   : debug modeかどうかを判定する変数

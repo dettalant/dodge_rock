@@ -21,7 +21,7 @@ mod view;
 
 use core_state::CoreState;
 
-fn ggez_init() {
+fn ggez_init(conf: conf::GameConf) {
     // TODO 今は直書きだけど、後々変更を施したい
     let mut cb = ContextBuilder::new("dodge_rock", "dettalant")
         .window_setup(ggez::conf::WindowSetup::default()
@@ -43,7 +43,7 @@ fn ggez_init() {
     // 了承なく.configと.localにフォルダ作るのやめてよggezくん
     let _ = etc::unused_dir_remove(ctx);
     
-    match CoreState::new(ctx) {
+    match CoreState::new(ctx, conf) {
         Err(e) => {
             println!("ゲーム起動に失敗");
             println!("Error: {}", e);
@@ -64,8 +64,8 @@ fn main() {
     args::Args::new();
 
     // ゲームの設定読み込みと環境変数指定
-    let _conf = conf::GameConf::new("game_config.toml");
+    let conf = conf::GameConf::new("game_config.toml").unwrap();
     
     // ggezの初期化開始
-    ggez_init();
+    ggez_init(conf);
 }

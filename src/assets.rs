@@ -22,6 +22,7 @@ use ggez::graphics::Image;
 use ggez::audio;
 
 use etc;
+use conf::GameConf;
 
 pub struct Assets {
     pub player_ship: Image,
@@ -29,8 +30,8 @@ pub struct Assets {
 }
 
 impl Assets {
-    pub fn new(ctx: &mut Context) -> GameResult<Self> {
-        let a_map = Assets::set_assets_map()?;
+    pub fn new<'a>(ctx: &mut Context, conf: &'a GameConf) -> GameResult<Self> {
+        let a_map = Assets::set_assets_map(conf)?;
         let player_ship = Image::new(
             ctx, 
             a_map.get("player_ship_64x64.png").unwrap(), // うろおぼえ実装だから後で確認
@@ -47,18 +48,10 @@ impl Assets {
         })
     }
     
-    #[allow(dead_code)]
-    /// ファイル読み込みデバッグ用。
-    pub fn debug_new() -> Result<()> {
-        let a_map = Assets::set_assets_map()?;
-        println!("debug_map: {:?}", a_map);
-        Ok(())
-    }
-
     /// assetsフォルダを楽ちんに読み込む
-    pub fn set_assets_map<'a>() -> Result<HashMap<String, PathBuf>> {
+    pub fn set_assets_map<'a>(conf: &'a GameConf) -> Result<HashMap<String, PathBuf>> {
         // assetsフォルダは環境変数で取ってきてるよ
-        let assets_path = Assets::set_assets_dir();
+        let assets_path = Assets::set_assets_dir(&conf.assets.assets_dir);
         
         // assetsフォルダがなかったらエラーで落とす
         if !assets_path.exists() {
@@ -70,8 +63,8 @@ impl Assets {
         
         // 環境変数に翻訳データが登録されてたら、そのディレクトリを追加
         // 安易な処理なので、もしかしたらバグが起きるかも。注意ね。
-        if let Ok(translate_data_dir) = env::var("GAME_TRANSLATE_DATA_DIR") {
-            let tmp_tl_path = etc::eazy_path_set(&translate_data_dir);
+        if conf.translate.is_translate {
+            let tmp_tl_path = etc::eazy_path_set(&conf.translate.translate_data_dir);
             
             if !tmp_tl_path.exists() {
                 panic!("Error: 存在しない翻訳データフォルダが指定された");
@@ -86,7 +79,7 @@ impl Assets {
     }
     
     /// 内部用。assetsフォルダのpathを取得する。
-    fn set_assets_dir<'a>() -> PathBuf {
+    fn set_assets_dir<'a>(assets_dir: &'a str) -> PathBuf {
         let mut assets_path = PathBuf::new();
         
         // cargoで起動したら、cargoのディレクトリをpathbufに追加
@@ -97,11 +90,8 @@ impl Assets {
         
         // conf.rsで追加した環境変数から、assetsディレクトリ名を指定
         // もし環境変数になければpanic!する
-        if let Ok(assets_dir) = env::var("GAME_ASSETS_DIR") {
-            assets_path.push(assets_dir);
-        } else {
-            panic!("環境変数エラー: \"GAME_ASSETS_DIR\"が未指定");
-        }
+        assets_path.push(assets_dir);
+
         assets_path
     }
     

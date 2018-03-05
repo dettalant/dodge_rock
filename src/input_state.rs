@@ -54,7 +54,7 @@ impl InputState {
         input
     }
     
-    /// キーが押されたら、入力信号をオン(1)に
+    /// キーが押されたら、入力信号をtrueに。キーボード用。
     pub fn key_press(&mut self, 
                   keycode: Keycode,
                   _keymod: Mod) {
@@ -62,7 +62,7 @@ impl InputState {
         self.user_key_controll(keycode, true);
     }
     
-    /// キーが離されたなら、入力信号をオフ(0)に
+    /// キーが離されたなら、入力信号をfalseに。キーボード用。
     pub fn key_release(&mut self,
                     keycode: Keycode,
                     _keymod: Mod) {
@@ -70,11 +70,12 @@ impl InputState {
         self.user_key_controll(keycode, false);
     }
     
+    /// キーが押されたら、入力信号をtrueに。パッド用。
     pub fn pad_press(&mut self, btn: Button) {
         // 1pコンの入力のみ取得しているよ
         self.user_pad_controll(btn, true);
     }
-    
+    /// キーが離されたなら、入力信号をfalseに。パッド用。
     pub fn pad_release(&mut self, btn: Button) {
         // 1pコンでのみ動作
         self.user_pad_controll(btn, false);

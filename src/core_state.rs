@@ -4,8 +4,6 @@
   ユーザー入力の受け取り方をここで決めて、
   InputStateの形でまとめる。
   
-  * const DESIRED_FPS: 固定FPSの数値（60fps）
-  
   * impl CoreState: ゲームのガワを包む皮
     * new(): よくある初期化のやつ
   
@@ -28,6 +26,7 @@ use ggez::{ Context, GameResult};
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
 use assets;
+use conf::GameConf;
 use input_state::InputState;
 use game_state::GameState;
 use view;
@@ -42,19 +41,18 @@ pub struct CoreState {
     pub input: InputState,
     /// ゲーム内で使う変数まとめ
     pub game_state: GameState,
+    /// game_config.tomlから取得する情報がここに
+    pub game_conf: GameConf,
 }
 
-// 固定FPSの数値
-const DESIRED_FPS: u32 = 60;
-
 impl CoreState {
-    pub fn new(ctx: &mut Context) -> GameResult<CoreState> {
-        let assets = assets::Assets::new(ctx)?;
+    pub fn new(ctx: &mut Context, conf: GameConf) -> GameResult<CoreState> {
+        let assets = assets::Assets::new(ctx, &conf)?;
         let game_state = GameState::new(ctx, &assets);
         
         // "-d"引数を付けて起動した際のデバッグモード
         if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
-            print_debug(ctx, &game_state);
+            print_debug(ctx, &game_state, &conf);
         }
         
         Ok(CoreState {
@@ -62,13 +60,19 @@ impl CoreState {
             assets: assets,
             input: InputState::new(),
             game_state: game_state,
+            game_conf: conf,
         })
     }
 }
 
 impl EventHandler for CoreState {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        while timer::check_update_time(ctx, DESIRED_FPS) {        
+        // 固定フレームレートで更新されるようにする
+        // FPS上限値はgame_config.tomlから取得
+        while timer::check_update_time(
+            ctx, 
+            self.game_conf.game_option.constant_fps) {        
+            // ウィンドウがアクティブな際のみ更新させる
             if self.has_focus {
                 self.game_state.main_game_mode(&self.input)?;
             } 
@@ -135,10 +139,12 @@ impl EventHandler for CoreState {
 
 /// デバッグモードの際に、たまに参照したくなるデータを表示する
 fn print_debug(ctx: &mut Context, 
-               game_state: &GameState) {
-    let translate_dir = match env::var("GAME_TRANSLATE_DATA_DIR") {
-        Ok(s) => s,
-        Err(_) => "未指定(translateフラグがオフ)".to_string(),
+               game_state: &GameState,
+               conf: &GameConf) {
+    let translate_dir = if conf.translate.is_translate {
+        &conf.translate.translate_data_dir
+    } else {
+        "is_translateフラグ未指定"
     };
     
     let debug_text = format!("    \
@@ -155,9 +161,9 @@ fn print_debug(ctx: &mut Context,
         ctx.conf.window_mode.width,
         ctx.conf.window_mode.height,
         ctx.conf.window_mode.vsync,
-        DESIRED_FPS,
+        conf.game_option.constant_fps,
         env::var("GAME_ACTIVATE_MODE").unwrap(),
-        env::var("GAME_ASSETS_DIR").unwrap(),
+        conf.assets.assets_dir,
         translate_dir,
         game_state);
     
