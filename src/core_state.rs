@@ -20,12 +20,14 @@
   * print_debug: 起動時に一度のみデバッグモード文章を表示する
 -------------------------------*/ 
 use std::env;
+//use std::thread;
 
 use ggez::{ timer };
 use ggez::{ Context, GameResult};
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
-use assets;
+use assets::Assets;
+use audio::GameAudio;
 use conf::GameConf;
 use input_state::InputState;
 use game_state::GameState;
@@ -36,7 +38,9 @@ pub struct CoreState {
     /// ウィンドウがアクティブになっているか否か
     pub has_focus: bool,
     /// ゲームアセットをひとまとめ
-    pub assets: assets::Assets,
+    pub assets: Assets,
+    /// ゲーム内でのBGM関連まとめ
+    pub audio: GameAudio,
     /// ユーザー操作をinputとして受ける
     pub input: InputState,
     /// ゲーム内で使う変数まとめ
@@ -47,7 +51,11 @@ pub struct CoreState {
 
 impl CoreState {
     pub fn new(ctx: &mut Context, conf: GameConf) -> GameResult<CoreState> {
-        let assets = assets::Assets::new(ctx, &conf)?;
+        // コンパイル通すためのむっちゃんこ汚いやり方。また直す。
+        let assets_map = Assets::new_map(&conf)?;
+        let audio = GameAudio::new(ctx, assets_map)?;
+        
+        let assets = Assets::new(ctx, &conf)?;
         let game_state = GameState::new(ctx, &assets);
         
         // "-d"引数を付けて起動した際のデバッグモード
@@ -58,6 +66,7 @@ impl CoreState {
         Ok(CoreState {
             has_focus: false,
             assets: assets,
+            audio: audio,
             input: InputState::new(),
             game_state: game_state,
             game_conf: conf,
@@ -76,6 +85,7 @@ impl EventHandler for CoreState {
             if self.has_focus {
                 self.game_state.main_game_mode(&self.input)?;
                 //self.game_state.bgm_tuner(&self.assets)?;
+                //self.audio.bgm_tuner(&self.input);
             }
         }
         Ok(())

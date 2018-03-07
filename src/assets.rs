@@ -19,42 +19,34 @@ use std::io::Result;
 
 use ggez::{ Context, GameResult };
 use ggez::graphics::Image;
-use ggez::audio;
 
+use audio::GameAudio;
 use etc;
 use conf::GameConf;
 
 pub struct Assets {
     pub player_ship: Image,
-    pub test_bgm: audio::Source,
-    pub no_sound: audio::Source,
 }
 
 impl Assets {
+    /// Assets structを生成する（あとで消すかも）
     pub fn new<'a>(ctx: &mut Context, conf: &'a GameConf) -> GameResult<Self> {
         let a_map = Assets::set_assets_map(conf)?;
         let player_ship = Image::new(
             ctx, 
             a_map.get("player_ship_39x64.png").unwrap(), // うろおぼえ実装だから後で確認
         )?; 
-        
-        let test_bgm = audio::Source::new(
-            ctx,
-            a_map.get("game_breaker.ogg").unwrap(),
-        )?;
-        
-        let no_sound = audio::Source::new(
-            ctx,
-            a_map.get("no_sound_3s.wav").unwrap(),
-        )?;
-        
+
         Ok(Assets {
             player_ship: player_ship,
-            test_bgm: test_bgm,
-            no_sound: no_sound,
         })
     }
-    
+    /// Assets mapだけを生成する（読み取るだけ）
+    pub fn new_map<'a>(conf: &'a GameConf) -> GameResult<HashMap<String, PathBuf>> {
+        let a_map = Assets::set_assets_map(conf)?;
+        
+        Ok(a_map)
+    }
     /// assetsフォルダを楽ちんに読み込む
     pub fn set_assets_map<'a>(conf: &'a GameConf) -> Result<HashMap<String, PathBuf>> {
         // assetsフォルダは環境変数で取ってきてるよ

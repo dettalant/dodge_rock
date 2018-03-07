@@ -1,7 +1,6 @@
-#[macro_use]
-extern crate serde_derive;
-extern crate toml;
 extern crate ggez;
+
+extern crate dodge_rock;
 
 use std::env;
 use std::path::PathBuf;
@@ -10,18 +9,11 @@ use std::path::PathBuf;
 use ggez::{ ContextBuilder };
 use ggez::event::run;
 
-mod args;
-mod assets;
-mod conf;
-mod core_state;
-mod etc;
-mod game_state;
-mod input_state;
-mod view;
+use dodge_rock::{ args, etc };
+use dodge_rock::core_state::CoreState;
+use dodge_rock::conf::GameConf;
 
-use core_state::CoreState;
-
-fn ggez_init(conf: conf::GameConf) {
+fn ggez_init(conf: GameConf) {
     // TODO 今は直書きだけど、後々変更を施したい
     let mut cb = ContextBuilder::new("dodge_rock", "dettalant")
         .window_setup(ggez::conf::WindowSetup::default()
@@ -64,7 +56,7 @@ fn main() {
     args::Args::new();
 
     // ゲームの設定読み込みと環境変数指定
-    let conf = conf::GameConf::new("game_config.toml").unwrap();
+    let conf = GameConf::new("game_config.toml").unwrap();
     
     // ggezの初期化開始
     ggez_init(conf);

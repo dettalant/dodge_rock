@@ -19,6 +19,8 @@
   * player_move_speed(): いつかゲーム内から速度調整するためのバッファ
 -------------------------------*/ 
 use std;
+use std::thread;
+use std::sync::{ Arc, Mutex };
 use ggez::{Context, GameResult};
 
 use assets;
@@ -26,7 +28,7 @@ use input_state::InputState;
 
 // また今度別ファイルに移行させたい
 // 今は簡易版として、とりあえず形だけ作る
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Player {
     /// 左右初期値
     pub x: f32,
@@ -38,7 +40,7 @@ pub struct Player {
     pub height: u32,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Actor {
     pub player: Player,
 }
@@ -59,7 +61,7 @@ impl Actor {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 /// ゲームシステムと関係する変数をここに入れる
 pub struct System {
     pub window_h: u32,
@@ -83,7 +85,7 @@ impl System {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct GameState {
     pub actor: Actor,
     pub system: System,
@@ -198,46 +200,47 @@ impl GameState {
         self.system.is_bgm = false;
     }
     
-    /// ゲーム場面に応じたBGMを再生する
-    pub fn bgm_tuner(&self, 
-                    assets: &assets::Assets) -> GameResult<()> {
-        {
-            // テスト領域
-            //println!("is_bgm: {}, is_bgm_paused: {},\
-            //current_bgm: {}",
-                //self.system.is_bgm,
-                //self.system.is_bgm_paused,
-                //self.system.current_bgm);
-        }
+    //#[allow(dead_code)]
+    ///// ゲーム場面に応じたBGMを再生する
+    //pub fn bgm_tuner(&self, 
+                    //assets: &assets::Assets) -> GameResult<()> {
+        //{
+            //// テスト領域
+            ////println!("is_bgm: {}, is_bgm_paused: {},\
+            ////current_bgm: {}",
+                ////self.system.is_bgm,
+                ////self.system.is_bgm_paused,
+                ////self.system.current_bgm);
+        //}
         
-        // tmp_m変数にassetsの変数を束縛して、多様なトラックを一つの手段でかける
-        // 要するに曲番号一覧ってこと。
-        let tmp_m = match self.system.current_bgm {
-            0 => &assets.no_sound,
-            1 => &assets.test_bgm,
-            _ => &assets.no_sound,
-        };
+        //// tmp_m変数にassetsの変数を束縛して、多様なトラックを一つの手段でかける
+        //// 要するに曲番号一覧ってこと。
+        //let tmp_m = match self.system.current_bgm {
+            //0 => &assets.audio.no_sound,
+            //1 => &assets.audio.test_bgm,
+            //_ => &assets.audio.no_sound,
+        //};
         
-        // ここ、マクロを使ってもう少しまともな形にしたい
-        if self.system.is_bgm {
-            // 1だとtest_bgmを再生
-            if tmp_m.paused() {
-                tmp_m.resume();
-            } else if tmp_m.stopped() {
-                tmp_m.play()?;
-            }
-        } else if self.system.is_bgm_paused && !self.system.is_bgm {
-            if tmp_m.playing() {
-                tmp_m.pause();
-            }
-        } else if !self.system.is_bgm {
-            if !tmp_m.stopped() {
-                tmp_m.stop();
-            }
-        }
+        //// ここ、マクロを使ってもう少しまともな形にしたい
+        //if self.system.is_bgm {
+            //// 1だとtest_bgmを再生
+            //if tmp_m.paused() {
+                //tmp_m.resume();
+            //} else if tmp_m.stopped() {
+                //tmp_m.play()?;
+            //}
+        //} else if self.system.is_bgm_paused && !self.system.is_bgm {
+            //if tmp_m.playing() {
+                //tmp_m.pause();
+            //}
+        //} else if !self.system.is_bgm {
+            //if !tmp_m.stopped() {
+                //tmp_m.stop();
+            //}
+        //}
         
-        Ok(())
-    }
+        //Ok(())
+    //}
 }
 
 
