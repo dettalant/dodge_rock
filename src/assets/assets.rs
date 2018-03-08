@@ -20,12 +20,12 @@ use std::io::Result;
 use ggez::{ Context, GameResult };
 use ggez::graphics::Image;
 
-use audio::GameAudio;
 use etc;
 use conf::GameConf;
 
 pub struct Assets {
     pub player_ship: Image,
+    pub enemy_block: Image,
 }
 
 impl Assets {
@@ -34,11 +34,17 @@ impl Assets {
         let a_map = Assets::set_assets_map(conf)?;
         let player_ship = Image::new(
             ctx, 
-            a_map.get("player_ship_39x64.png").unwrap(), // うろおぼえ実装だから後で確認
+            a_map.get("player_ship_29x48.png").unwrap(), // うろおぼえ実装だから後で確認
+        )?; 
+        
+        let enemy_block = Image::new(
+            ctx, 
+            a_map.get("enemy_block_32x32.png").unwrap(), // うろおぼえ実装だから後で確認
         )?; 
 
         Ok(Assets {
             player_ship: player_ship,
+            enemy_block: enemy_block,
         })
     }
     /// Assets mapだけを生成する（読み取るだけ）

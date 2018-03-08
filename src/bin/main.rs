@@ -20,7 +20,7 @@ fn ggez_init(conf: GameConf) {
             .title("Dodge Rock Game")
         )
         .window_mode(ggez::conf::WindowMode::default()
-            .dimensions(640, 480)
+            .dimensions(360, 480)
         );
     
     if let Ok(manifest_dir) = env::var("CARGO_MANIFEST_DIR") {

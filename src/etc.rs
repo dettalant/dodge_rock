@@ -20,6 +20,8 @@ use std::io::{ BufReader, Read };
 
 // for ggez
 use ggez;
+use rand::{ self, Rng };
+
 
 pub struct File;
 
@@ -101,4 +103,12 @@ pub fn eazy_path_set<'a>(path_str: &'a str) -> PathBuf {
     path_base.push(path_str);
     
     path_base
+}
+
+/// ランダムな値xを生み出す
+/// 
+/// 使用例: `let x = random_x(800);`
+pub fn random_x(max_num: u32) -> f32 {
+    let out_n: u32 = rand::thread_rng().gen_range(0, max_num);
+    out_n as f32
 }

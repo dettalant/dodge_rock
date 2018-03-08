@@ -18,6 +18,7 @@ pub fn render_game(core: &mut CoreState, ctx: &mut Context) -> GameResult<()> {
     graphics::clear(ctx);
     
     render_player(core, ctx)?;
+    render_enemy(core, ctx)?;
     
     graphics::present(ctx);
     
@@ -33,5 +34,24 @@ fn render_player(core: &mut CoreState, ctx: &mut Context) -> GameResult<()> {
                    &core.assets.player_ship, 
                    player_pos,
                    0.0)?;
+    Ok(())
+}
+
+fn render_enemy(core: &mut CoreState, ctx: &mut Context) -> GameResult<()> {
+    // いちいち書くのがだるいので、短縮ネームを変数束縛
+    let e_block = &core.game_state.actor.e_block;
+    
+    for li in e_block {
+        let e_block_pos = Point2::new(
+            li.x,
+            li.y,
+        );
+        
+        graphics::draw(ctx,
+                       &core.assets.enemy_block,
+                       e_block_pos,
+                       0.0)?;
+    }
+    
     Ok(())
 }

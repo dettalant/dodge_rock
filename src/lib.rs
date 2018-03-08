@@ -2,9 +2,11 @@
 extern crate serde_derive;
 extern crate toml;
 extern crate ggez;
+extern crate rand;
 
 pub mod args;
-pub mod audio;
+// audio機能は一旦凍結
+//pub mod audio;
 pub mod assets;
 pub mod conf;
 pub mod core_state;

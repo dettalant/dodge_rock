@@ -27,7 +27,7 @@ use ggez::{ Context, GameResult};
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
 use assets::Assets;
-use audio::GameAudio;
+use etc;
 use conf::GameConf;
 use input_state::InputState;
 use game_state::GameState;
@@ -39,8 +39,6 @@ pub struct CoreState {
     pub has_focus: bool,
     /// ゲームアセットをひとまとめ
     pub assets: Assets,
-    /// ゲーム内でのBGM関連まとめ
-    pub audio: GameAudio,
     /// ユーザー操作をinputとして受ける
     pub input: InputState,
     /// ゲーム内で使う変数まとめ
@@ -51,22 +49,24 @@ pub struct CoreState {
 
 impl CoreState {
     pub fn new(ctx: &mut Context, conf: GameConf) -> GameResult<CoreState> {
-        // コンパイル通すためのむっちゃんこ汚いやり方。また直す。
-        let assets_map = Assets::new_map(&conf)?;
-        let audio = GameAudio::new(ctx, assets_map)?;
-        
         let assets = Assets::new(ctx, &conf)?;
-        let game_state = GameState::new(ctx, &assets);
+        let mut game_state = GameState::new(ctx, &assets);
+        
         
         // "-d"引数を付けて起動した際のデバッグモード
         if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
             print_debug(ctx, &game_state, &conf);
+
+            // デバッグ用に初期状態から表示させておく
+            game_state.actor.add_e_block(
+                etc::random_x(game_state.system.window_w), 
+                0.0,
+            );
         }
         
         Ok(CoreState {
             has_focus: false,
             assets: assets,
-            audio: audio,
             input: InputState::new(),
             game_state: game_state,
             game_conf: conf,
@@ -83,9 +83,7 @@ impl EventHandler for CoreState {
             self.game_conf.game_option.constant_fps) {        
             // ウィンドウがアクティブな際のみ更新させる
             if self.has_focus {
-                self.game_state.main_game_mode(&self.input)?;
-                //self.game_state.bgm_tuner(&self.assets)?;
-                //self.audio.bgm_tuner(&self.input);
+                self.game_state.main_game_mode(&mut self.input)?;
             }
         }
         Ok(())
