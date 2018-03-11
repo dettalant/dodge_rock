@@ -46,7 +46,6 @@ pub struct InputState {
     /// 十字キー右
     pub move_right: bool,
     /// デバッグ用
-    pub key_d: bool,
     pub key_m: bool,
 }
 
@@ -110,12 +109,24 @@ impl InputState {
           上下左右 == false
         */
         
+        // 方向キー、wasdキー、hjklキー(vim配列)に対応。
         match keycode {
+            // 方向キー
             Keycode::Up    => self.move_up = pressed,
             Keycode::Down  => self.move_down = pressed,
             Keycode::Left  => self.move_left = pressed,
             Keycode::Right => self.move_right = pressed,
-            Keycode::D     => self.key_d = pressed,
+            // wasdキー
+            Keycode::W     => self.move_up = pressed,
+            Keycode::A     => self.move_left = pressed,
+            Keycode::S     => self.move_down = pressed,
+            Keycode::D     => self.move_right = pressed,
+            // vim配列(hjklキー)
+            Keycode::K     => self.move_up = pressed,
+            Keycode::H     => self.move_left = pressed,
+            Keycode::J     => self.move_down = pressed,
+            Keycode::L     => self.move_right = pressed,
+            // デバッグ用キー
             Keycode::M     => self.key_m = pressed,
             _ => (), // Do nothing
         }

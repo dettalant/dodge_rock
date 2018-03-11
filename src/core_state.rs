@@ -14,19 +14,18 @@
     * key_up_event()  : キーボードを離した際のもの
     * controller_button_down_event(): コントローラー版押下
     * controller_button_up_event()  : コントローラー版放上
-    * controller_axis_event: アナログスティックの動きを検知
-    * focus_event: ウィンドウがアクティブになっているかを検知
+    * controller_axis_event(): アナログスティックの動きを検知
+    * focus_event(): ウィンドウがアクティブになっているかを検知
   
-  * print_debug: 起動時に一度のみデバッグモード文章を表示する
+  * debug_frames():
+  * print_debug() : 起動時に一度のみデバッグモード文章を表示する
+  * measure_time():
 -------------------------------*/ 
 use std::env;
-//use std::thread;
 
 use ggez::{ timer };
 use ggez::{ self, Context, GameResult };
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
-
-//use range_checker::{ Range, RangeImpl };
 
 use assets::Assets;
 use etc;
@@ -49,7 +48,9 @@ pub struct CoreState {
     pub game_conf: GameConf,
 }
 
+/// ゲーム根幹システム
 impl CoreState {
+    /// ゲーム根幹システムの初期化
     pub fn new(ctx: &mut Context, conf: GameConf) -> GameResult<CoreState> {
         let assets = Assets::new(ctx, &conf)?;
         let mut game_state = GameState::new(ctx, &assets);
@@ -59,6 +60,7 @@ impl CoreState {
             print_debug(ctx, &game_state, &conf);
         }
         
+        // 初期状態で敵を一体出現させる
         game_state.actor.add_e_block(
             etc::random_x(game_state.system.window_w), 
             -50.0,
@@ -74,7 +76,9 @@ impl CoreState {
     }
 }
 
+// ggez備え付けのイベントハンドラ
 impl EventHandler for CoreState {
+    // ゲームシステムを更新する部分
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         // 固定フレームレートで更新されるようにする
         // FPS上限値はgame_config.tomlから取得
@@ -101,6 +105,7 @@ impl EventHandler for CoreState {
         Ok(())
     }
     
+    // 画面を描画する部分
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
 
         view::render_game(self, ctx)?;
@@ -108,6 +113,7 @@ impl EventHandler for CoreState {
         Ok(())
     }
     
+    // キーボードのキーが押下された時に作動。
     fn key_down_event(&mut self, 
                       _ctx: &mut Context, 
                       keycode: Keycode, 
@@ -116,6 +122,8 @@ impl EventHandler for CoreState {
         // 押されたキーの処遇はInputStateで判定
         self.input.key_press(keycode, keymod);
     }
+    
+    // キーボードのキーが放上された時に作動
     fn key_up_event(&mut self, 
                     _ctx: &mut Context,
                     keycode: Keycode, 
@@ -124,6 +132,7 @@ impl EventHandler for CoreState {
         self.input.key_release(keycode, keymod);
     }
     
+    // ゲームパッドのボタンが押下された時に作動
     fn controller_button_down_event(&mut self, _ctx: &mut Context, btn: Button, instance_id: i32) {
         // このゲームはおひとりさま専用でありんす
         if instance_id == 0 {
@@ -131,13 +140,15 @@ impl EventHandler for CoreState {
         }
     }
 
+    // ゲームパッドのボタンが放上された時に作動
     fn controller_button_up_event(&mut self, _ctx: &mut Context, btn: Button, instance_id: i32) {
         // このゲームはおひとりさま専用(ry
         if instance_id == 0 {
             self.input.pad_release(btn);
         }
     }
-
+    
+    // ゲームパッドのアナログスティックの値を取る
     fn controller_axis_event(&mut self,
                              _ctx: &mut Context,
                              axis: Axis,
@@ -148,7 +159,7 @@ impl EventHandler for CoreState {
         }
     }
 
-
+    // 画面がアクティブであるかを検出する
     fn focus_event(&mut self, _ctx: &mut Context, gained: bool) {
         if gained {
             self.has_focus = true;
@@ -191,6 +202,7 @@ fn print_debug(ctx: &mut Context,
     println!("{}", debug_text);
 }
 
+// 計測するフレーム数から、秒数を計測する
 fn measure_time(game_state: &mut GameState, constant_fps: u32) {
     // 常にフレーム数を計測
     game_state.system.frames += 1;
@@ -207,11 +219,12 @@ fn debug_frames(ctx: &mut Context, game_state: &mut GameState) {
             ggez::timer::get_fps(ctx),
             game_state.system.seconds,
             game_state.actor.e_block.len());
-        println!("Player.x: {}, Player.y: {}, Player.w: {}, Player.h: {}",
-            game_state.actor.player.x,
-            game_state.actor.player.y,
-            game_state.actor.player.width,
-            game_state.actor.player.height);
-        println!("Player.collision: {}", game_state.actor.player.collision);
+        //println!("Player.x: {}, Player.y: {}, Player.w: {}, Player.h: {}",
+            //game_state.actor.player.x,
+            //game_state.actor.player.y,
+            //game_state.actor.player.width,
+            //game_state.actor.player.height);
+        //println!("Player.collision: {}", game_state.actor.player.collision);
+        println!("現在敵速度: {}", game_state.system.enemy_move_speed);
     }
 }

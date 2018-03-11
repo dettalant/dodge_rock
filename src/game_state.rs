@@ -10,20 +10,32 @@
   * struct Actor : 意識を持つようにして動くもの。また今度別の場所に移したい。
   * struct System: ゲームシステムに影響を持つ変数はここに。
   
+  * impl Template:
+    * new()
+    
   * impl Actor: 
+    * new()
     * add_e_block()
+
+  * impl System:
+    * new()
   
   * impl GameState: ゲーム内システム進行について
     * new(): よくある初期化
     * main_game_system_loop(): メインゲームループを扱う
     * player_move(): 自機移動についてのもろもろ
+    * player_move_speed(): 現在の自機移動速度を出す
     * player_collision_check(): 自機が画面外に出ないようにする（また今度当たり判定も取る）
+    * enemy_move()
+    * enemy_move_speed()
+    * enemy_move_speed_adjust()
+    * enemy_pop()
     * debug_key():
   
   * axis_move()   : アナログスティック操作変数を、画面描画に役立つ形に直す
   * key_move()    : 十字キー操作変数を、画面描画に役立つ形に直す
-  * player_move_speed(): いつかゲーム内から速度調整するためのバッファ
 -------------------------------*/ 
+
 use std::env;
 use std::thread;
 
@@ -37,6 +49,7 @@ use input_state::InputState;
 // また今度別ファイルに移行させたい
 // 今は簡易版として、とりあえず形だけ作る
 #[derive(Clone, Debug, Default)]
+/// 自機が保有する変数セット
 pub struct Player {
     /// 左右初期値
     pub x: f32,
@@ -51,6 +64,7 @@ pub struct Player {
 }
 
 #[derive(Clone, Debug, Default)]
+/// 敵一体一体が保有する変数セット
 pub struct Enemy {
     /// 左右座標値
     pub x: f32,
@@ -65,6 +79,7 @@ pub struct Enemy {
 }
 
 #[derive(Clone, Debug)]
+/// 敵追加のためのテンプレート
 pub struct Template {
     pub e_block: Enemy,
 }
@@ -86,6 +101,7 @@ impl Template {
 }
 
 #[derive(Clone, Debug)]
+/// 自機や敵など、動いてゲームに関わるアクター
 pub struct Actor {
     pub player: Player,
     pub e_block: Vec<Enemy>,
@@ -233,7 +249,7 @@ impl GameState {
         6.0 * self.system.player_move_speed
     }
     
-    // 自機が画面外に出ないようにチェック
+    /// 自機が画面外に出ないようにチェック
     fn player_collision_check(&mut self) {
         // 横軸画面端計算
         if self.actor.player.x.is_sign_positive() {
@@ -266,12 +282,7 @@ impl GameState {
     
     /// 敵の移動を自動で行い、コリジョンを指定する
     fn enemy_move(&mut self) {
-        // 徐々に速度が上がっていくようにしたい
-        if self.system.frames % 60 == 0 {
-            // テスト用にめちゃんこ早く増加
-            self.system.enemy_move_speed += 0.1;
-        }
-        
+        self.enemy_move_speed_adjust();
         
         // e_blockたちの表示座標を動かす
         for i in 0..self.actor.e_block.len() {
@@ -294,14 +305,28 @@ impl GameState {
         }
     }
     
-    /// 敵移動速度の調整
+    /// 徐々に敵速度を上昇させていく関数
+    fn enemy_move_speed_adjust(&mut self) {
+        // 一定期間に一回判定するためのboolを作る
+        let is_speed_up = self.system.frames % 30 == 0; 
+        
+        // 敵速度が一定になるまでは早く速度上昇させて、それ移行はゆっくり
+        if is_speed_up && self.system.enemy_move_speed < 5.0 {
+            // テスト用にめちゃんこ早く増加
+            self.system.enemy_move_speed += 0.1;
+        } else if is_speed_up {
+            self.system.enemy_move_speed += 0.05;
+        }
+    }
+    
+    /// 敵移動速度調整のための、変数内容を返す関数
     fn enemy_move_speed(&self) -> f32 {
         self.system.enemy_move_speed
     }
     
     /// 敵を一定間隔ごとに増やす
     fn enemy_pop(&mut self) {
-        // 今はとりあえず、5秒ごとに敵を増やす
+        // 今はとりあえず、5秒ごとに敵を1体増やす
         if (self.system.frames % 240) == 0 {
             let tmp_n = self.system.window_w - self.actor.template.e_block.width;
             self.actor.add_e_block(
@@ -319,6 +344,7 @@ impl GameState {
         
         let is_crash = thread::spawn(move || {
             let mut out_bool = false;
+            
             for i in 0..e_block_vec.len() {
                 if e_block_vec[i].collision.is_overlap(&p_collision) {
                     out_bool = true;
@@ -328,6 +354,7 @@ impl GameState {
             out_bool
         }).join().expect("is_crash handle開封時エラー");
         
+        // この部分に衝突時の内容を書き加える
         if is_crash {
             println!("{}, クラッシュ！", self.system.frames);
         }
@@ -335,8 +362,8 @@ impl GameState {
     
     /// デバッグ用のキー。用意しておいて、適当に書き換えて使う。
     fn debug_key(&mut self, input: &mut InputState) {
-        if input.key_d {
-            input.key_d = false;
+        if input.key_m {
+            input.key_m = false;
             self.actor.add_e_block(
                 etc::random_x(self.system.window_w),
                 0.0,

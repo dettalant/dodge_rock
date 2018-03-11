@@ -5,11 +5,13 @@
   細々とした関数をひとまとめにする
 
   * impl File
+    * empty_dir_remove(): エラーを吐かせないためにわざわざ確認する。これいる？
     * read_to_string   : stringとしてファイルを読み取る
     * read_to_vec      : Vec<u8>としてファイルを読み取る
 
   * unused_dir_remove(): ggezが自動生成するフォルダを削除
   * eazy_path_set()    : cargo環境でも通常環境でも適応できるpathをセット
+  * random_x()         : 敵出現位置用の乱数を取るやつ
 -------------------------------*/
 use std;
 use std::path::{ Path, PathBuf };
