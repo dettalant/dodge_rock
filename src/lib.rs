@@ -4,6 +4,9 @@ extern crate toml;
 extern crate ggez;
 extern crate rand;
 
+/// 自前のやつ
+extern crate range_checker; 
+
 pub mod args;
 // audio機能は一旦凍結
 //pub mod audio;

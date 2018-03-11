@@ -25,7 +25,10 @@
   * player_move_speed(): いつかゲーム内から速度調整するためのバッファ
 -------------------------------*/ 
 use std::env;
-use ggez::{Context, GameResult};
+use std::thread;
+
+use ggez::{ Context, GameResult };
+use range_checker::{ Range2D, Range2DImpl };
 
 use assets;
 use etc;
@@ -43,6 +46,8 @@ pub struct Player {
     pub width: u32,
     /// 自機画像縦幅
     pub height: u32,
+    /// 当たり判定
+    pub collision: Range2D<f32>
 }
 
 #[derive(Clone, Debug, Default)]
@@ -55,6 +60,8 @@ pub struct Enemy {
     pub width: u32,
     /// 画像縦幅
     pub height: u32,
+    // 当たり判定
+    pub collision: Range2D<f32>,
 }
 
 #[derive(Clone, Debug)]
@@ -69,6 +76,7 @@ impl Template {
             y: 0.0,
             width: assets.enemy_block.width(),
             height: assets.enemy_block.height(),
+            collision: Range2D::default(),
         };
         
         Template {
@@ -86,18 +94,19 @@ pub struct Actor {
 
 impl Actor {
     pub fn new(assets: &assets::Assets,
-               system: &System) -> Self {
+               system: &System) -> Self {        
         let player = Player {
             x: (system.window_w - assets.player_ship.width()) as f32 / 2_f32,
             y: system.window_h as f32 * 0.7,
             width: assets.player_ship.width(),
             height: assets.player_ship.height(),
+            collision: Range2D::default(),
         };
         
         let template = Template::new(assets);
         
         Actor {
-            player: player, // 雑な配置 
+            player: player,
             e_block: Vec::<Enemy>::new(),
             template: template,    
         }
@@ -117,6 +126,8 @@ impl Actor {
 pub struct System {
     pub window_h: u32,
     pub window_w: u32,
+    pub frames: usize,
+    pub seconds: usize,
     pub player_move_speed: f32,
     pub enemy_move_speed: f32,
 }
@@ -126,6 +137,8 @@ impl System {
         System {
             window_w: ctx.conf.window_mode.width,
             window_h: ctx.conf.window_mode.height,
+            frames: 0,
+            seconds: 0,
             player_move_speed: 1.0,
             enemy_move_speed: 1.0,
         }
@@ -152,8 +165,14 @@ impl GameState {
     pub fn main_game_mode(&mut self, input: &mut InputState) -> GameResult<()>{
         // 自機移動
         self.player_move(input);
+        // 自機が画面外に出ないようにチェック
         self.player_collision_check();
+        // 敵が下方向に移動
         self.enemy_move();
+        // 敵を増殖
+        self.enemy_pop();
+        // 現状ではプレイヤーの当たり判定を見る
+        self.enemy_collision_check();
         
         if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
             self.debug_key(input);
@@ -203,6 +222,7 @@ impl GameState {
         self.actor.player.x += tmp_x * self.player_move_speed();
         self.actor.player.y += tmp_y * self.player_move_speed();
     }
+    
     /// 自機移動速度を調整する関数
     fn player_move_speed(&self) -> f32 {
         /*
@@ -215,8 +235,6 @@ impl GameState {
     
     // 自機が画面外に出ないようにチェック
     fn player_collision_check(&mut self) {
-        // 暫定として適当に配置
-        
         // 横軸画面端計算
         if self.actor.player.x.is_sign_positive() {
             let tmp_n = (self.system.window_w - self.actor.player.width) as f32;
@@ -236,12 +254,43 @@ impl GameState {
         } else {
             self.actor.player.y = 0_f32;
         }
+        
+        // 自機当たり判定を代入
+        self.actor.player.collision = Range2D::new(
+            self.actor.player.x + 10.0,
+            self.actor.player.y + 22.0,
+            (self.actor.player.width - 20) as f32,
+            (self.actor.player.height - 35) as f32,
+        );
     }
     
-    /// 敵の移動を自動で行う
+    /// 敵の移動を自動で行い、コリジョンを指定する
     fn enemy_move(&mut self) {
+        // 徐々に速度が上がっていくようにしたい
+        if self.system.frames % 60 == 0 {
+            // テスト用にめちゃんこ早く増加
+            self.system.enemy_move_speed += 0.1;
+        }
+        
+        
+        // e_blockたちの表示座標を動かす
         for i in 0..self.actor.e_block.len() {
             self.actor.e_block[i].y += 1.0 * self.enemy_move_speed();
+            // 画面外の一定地点に移動したら、上へとループさせる
+            if self.actor.e_block[i].y >= (self.system.window_h + 50) as f32 {
+                self.actor.e_block[i].x = etc::random_x(
+                    self.system.window_w - self.actor.template.e_block.width
+                );
+                self.actor.e_block[i].y = -50.0;
+            }
+            
+            // e_blockのコリジョンを追加（雑なやり方）
+            self.actor.e_block[i].collision = Range2D::new(
+                self.actor.e_block[i].x,
+                self.actor.e_block[i].y,
+                self.actor.e_block[i].width as f32,
+                self.actor.e_block[i].height as f32,
+            );
         }
     }
     
@@ -250,9 +299,38 @@ impl GameState {
         self.system.enemy_move_speed
     }
     
+    /// 敵を一定間隔ごとに増やす
+    fn enemy_pop(&mut self) {
+        // 今はとりあえず、5秒ごとに敵を増やす
+        if (self.system.frames % 240) == 0 {
+            let tmp_n = self.system.window_w - self.actor.template.e_block.width;
+            self.actor.add_e_block(
+                etc::random_x(tmp_n),
+                -50.0,
+            );
+        }
+    }
+    
     /// 敵の当たり判定処理
     fn enemy_collision_check(&self) {
+        // thread移行させるため安易にclone()
+        let e_block_vec = self.actor.e_block.clone();
+        let p_collision = self.actor.player.collision.clone();
         
+        let is_crash = thread::spawn(move || {
+            let mut out_bool = false;
+            for i in 0..e_block_vec.len() {
+                if e_block_vec[i].collision.is_overlap(&p_collision) {
+                    out_bool = true;
+                }
+            }
+            
+            out_bool
+        }).join().expect("is_crash handle開封時エラー");
+        
+        if is_crash {
+            println!("{}, クラッシュ！", self.system.frames);
+        }
     }
     
     /// デバッグ用のキー。用意しておいて、適当に書き換えて使う。

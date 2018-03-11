@@ -9,6 +9,8 @@
   * render_game  : ゲームの状況に合わせて、適切な部分を描画するおまとめ関数
   * render_player: プレイヤー周りを描画する
 -------------------------------*/ 
+use std::env;
+
 use ggez::{ Context, GameResult };
 use ggez::graphics::{ self, Point2 };
 
@@ -19,6 +21,10 @@ pub fn render_game(core: &mut CoreState, ctx: &mut Context) -> GameResult<()> {
     
     render_player(core, ctx)?;
     render_enemy(core, ctx)?;
+    
+    if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
+        debug_render(core, ctx)?;
+    }
     
     graphics::present(ctx);
     
@@ -52,6 +58,32 @@ fn render_enemy(core: &mut CoreState, ctx: &mut Context) -> GameResult<()> {
                        e_block_pos,
                        0.0)?;
     }
+    
+    Ok(())
+}
+
+fn debug_render(core: &mut CoreState, ctx: &mut Context) -> GameResult<()> {
+    let actor = &core.game_state.actor;
+    
+    let p_col_rect = graphics::Rect::new(
+        actor.player.x + 10.0,
+        actor.player.y + 22.0,
+        (actor.player.width - 20) as f32,
+        (actor.player.height - 35) as f32,
+    );
+    
+    let default_color = graphics::Color::new(1.0, 1.0, 1.0, 1.0);
+    let p_color = graphics::Color::from_rgba(0, 0, 255, 230);
+    
+    graphics::set_color(ctx, p_color)?;
+    
+    graphics::rectangle(
+        ctx,
+        graphics::DrawMode::Fill,
+        p_col_rect,
+    )?;
+    
+    graphics::set_color(ctx, default_color)?;
     
     Ok(())
 }

@@ -23,8 +23,10 @@ use std::env;
 //use std::thread;
 
 use ggez::{ timer };
-use ggez::{ Context, GameResult};
+use ggez::{ self, Context, GameResult };
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
+
+//use range_checker::{ Range, RangeImpl };
 
 use assets::Assets;
 use etc;
@@ -52,17 +54,15 @@ impl CoreState {
         let assets = Assets::new(ctx, &conf)?;
         let mut game_state = GameState::new(ctx, &assets);
         
-        
         // "-d"引数を付けて起動した際のデバッグモード
         if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
             print_debug(ctx, &game_state, &conf);
-
-            // デバッグ用に初期状態から表示させておく
-            game_state.actor.add_e_block(
-                etc::random_x(game_state.system.window_w), 
-                0.0,
-            );
         }
+        
+        game_state.actor.add_e_block(
+            etc::random_x(game_state.system.window_w), 
+            -50.0,
+        );
         
         Ok(CoreState {
             has_focus: false,
@@ -83,14 +83,26 @@ impl EventHandler for CoreState {
             self.game_conf.game_option.constant_fps) {        
             // ウィンドウがアクティブな際のみ更新させる
             if self.has_focus {
+                // フレーム数を計測して、時間を割り出す
+                measure_time(
+                    &mut self.game_state,
+                    self.game_conf.game_option.constant_fps,
+                );
+                
+                // メインのゲーム画面
                 self.game_state.main_game_mode(&mut self.input)?;
+                
+            }
+            
+            if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
+                debug_frames(ctx, &mut self.game_state);
             }
         }
         Ok(())
     }
     
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        // ゲーム描画のおまとめ関数
+
         view::render_game(self, ctx)?;
         
         Ok(())
@@ -177,4 +189,29 @@ fn print_debug(ctx: &mut Context,
         game_state);
     
     println!("{}", debug_text);
+}
+
+fn measure_time(game_state: &mut GameState, constant_fps: u32) {
+    // 常にフレーム数を計測
+    game_state.system.frames += 1;
+    
+    if (game_state.system.frames % constant_fps as usize) == 0 {
+        game_state.system.seconds += 1;
+    }
+}
+
+/// デバッグ用のフレーム表示。とりあえず標準出力に出す。
+fn debug_frames(ctx: &mut Context, game_state: &mut GameState) {   
+    if game_state.system.frames % 60 == 0 {
+        println!("FPS: {}, Seconds: {}, EnemyLen: {}", 
+            ggez::timer::get_fps(ctx),
+            game_state.system.seconds,
+            game_state.actor.e_block.len());
+        println!("Player.x: {}, Player.y: {}, Player.w: {}, Player.h: {}",
+            game_state.actor.player.x,
+            game_state.actor.player.y,
+            game_state.actor.player.width,
+            game_state.actor.player.height);
+        println!("Player.collision: {}", game_state.actor.player.collision);
+    }
 }
