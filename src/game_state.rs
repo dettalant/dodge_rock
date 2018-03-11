@@ -85,6 +85,7 @@ pub struct Template {
 }
 
 impl Template {
+    /// struct Templateを生成する
     pub fn new(assets: &assets::Assets) -> Self {
         let e_block = Enemy {
             x: 0.0,
@@ -109,6 +110,7 @@ pub struct Actor {
 }
 
 impl Actor {
+    /// struct Actorを生成する
     pub fn new(assets: &assets::Assets,
                system: &System) -> Self {        
         let player = Player {
@@ -128,6 +130,7 @@ impl Actor {
         }
     }
     
+    /// 敵を一体追加する
     pub fn add_e_block(&mut self, x: f32, y: f32) {
         let mut tmp_e = self.template.e_block.clone();
         tmp_e.x = x;
@@ -155,7 +158,7 @@ impl System {
             window_h: ctx.conf.window_mode.height,
             frames: 0,
             seconds: 0,
-            player_move_speed: 1.0,
+            player_move_speed: 2.0,
             enemy_move_speed: 1.0,
         }
     }
@@ -199,7 +202,7 @@ impl GameState {
     
     /// 自機移動をまとめる関数
     fn player_move(&mut self, input: &InputState) {
-        // アナログスティック処理
+        // アナログスティック処理のため、tmp変数にx,y値を入れる
         let (mut tmp_x, mut tmp_y) = if input.axis_lx != 0 || input.axis_ly != 0 {
             (axis_move(input.axis_lx), axis_move(input.axis_ly))
         } else {
@@ -235,18 +238,20 @@ impl GameState {
         }
         
         // 移動値を足して完成
-        self.actor.player.x += tmp_x * self.player_move_speed();
-        self.actor.player.y += tmp_y * self.player_move_speed();
+        self.actor.player.x += tmp_x * self.player_move_speed(input);
+        self.actor.player.y += tmp_y * self.player_move_speed(input);
     }
     
     /// 自機移動速度を調整する関数
-    fn player_move_speed(&self) -> f32 {
-        /*
-          現状は直書き。
-          後々でゲーム内変数から変更できるようにしたい。
-          （例：スピードアップアイテム）
-        */
-        6.0 * self.system.player_move_speed
+    fn player_move_speed(&mut self, input: &InputState) -> f32 {
+        // 低速移動ボタンを押下中は速度半減
+        let slow_buff = if input.speed_down {
+            0.6
+        } else {
+            1.0
+        };
+        
+        3.0 * self.system.player_move_speed * slow_buff
     }
     
     /// 自機が画面外に出ないようにチェック
@@ -280,7 +285,7 @@ impl GameState {
         );
     }
     
-    /// 敵の移動を自動で行い、コリジョンを指定する
+    /// 敵の移動を自動で行い、コリジョン値を指定する
     fn enemy_move(&mut self) {
         self.enemy_move_speed_adjust();
         
@@ -302,20 +307,22 @@ impl GameState {
                 self.actor.e_block[i].width as f32,
                 self.actor.e_block[i].height as f32,
             );
-        }
+        }// end for
     }
     
     /// 徐々に敵速度を上昇させていく関数
     fn enemy_move_speed_adjust(&mut self) {
         // 一定期間に一回判定するためのboolを作る
+        // 一秒一回だと若干速度上昇が露骨なので、0.5秒に一回
         let is_speed_up = self.system.frames % 30 == 0; 
         
-        // 敵速度が一定になるまでは早く速度上昇させて、それ移行はゆっくり
+        // はじめは早く速度上昇させて、それ移行はゆっくりに
         if is_speed_up && self.system.enemy_move_speed < 5.0 {
-            // テスト用にめちゃんこ早く増加
             self.system.enemy_move_speed += 0.1;
-        } else if is_speed_up {
+        } else if is_speed_up && self.system.enemy_move_speed < 7.0 {
             self.system.enemy_move_speed += 0.05;
+        } else if is_speed_up {
+            self.system.enemy_move_speed += 0.025
         }
     }
     
@@ -326,8 +333,8 @@ impl GameState {
     
     /// 敵を一定間隔ごとに増やす
     fn enemy_pop(&mut self) {
-        // 今はとりあえず、5秒ごとに敵を1体増やす
-        if (self.system.frames % 240) == 0 {
+        // 今はとりあえず、4秒ごとに敵を1体増やす
+        if self.system.frames % 240 == 0 {
             let tmp_n = self.system.window_w - self.actor.template.e_block.width;
             self.actor.add_e_block(
                 etc::random_x(tmp_n),

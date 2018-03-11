@@ -45,6 +45,8 @@ pub struct InputState {
     pub move_left: bool,
     /// 十字キー右
     pub move_right: bool,
+    /// 低速移動
+    pub speed_down: bool,
     /// デバッグ用
     pub key_m: bool,
 }
@@ -112,22 +114,25 @@ impl InputState {
         // 方向キー、wasdキー、hjklキー(vim配列)に対応。
         match keycode {
             // 方向キー
-            Keycode::Up    => self.move_up = pressed,
-            Keycode::Down  => self.move_down = pressed,
-            Keycode::Left  => self.move_left = pressed,
-            Keycode::Right => self.move_right = pressed,
+            Keycode::Up     => self.move_up = pressed,
+            Keycode::Down   => self.move_down = pressed,
+            Keycode::Left   => self.move_left = pressed,
+            Keycode::Right  => self.move_right = pressed,
             // wasdキー
-            Keycode::W     => self.move_up = pressed,
-            Keycode::A     => self.move_left = pressed,
-            Keycode::S     => self.move_down = pressed,
-            Keycode::D     => self.move_right = pressed,
+            Keycode::W      => self.move_up = pressed,
+            Keycode::A      => self.move_left = pressed,
+            Keycode::S      => self.move_down = pressed,
+            Keycode::D      => self.move_right = pressed,
             // vim配列(hjklキー)
-            Keycode::K     => self.move_up = pressed,
-            Keycode::H     => self.move_left = pressed,
-            Keycode::J     => self.move_down = pressed,
-            Keycode::L     => self.move_right = pressed,
+            Keycode::K      => self.move_up = pressed,
+            Keycode::H      => self.move_left = pressed,
+            Keycode::J      => self.move_down = pressed,
+            Keycode::L      => self.move_right = pressed,
+            // 低速移動
+            Keycode::LShift => self.speed_down = pressed,
+            Keycode::RShift => self.speed_down = pressed,
             // デバッグ用キー
-            Keycode::M     => self.key_m = pressed,
+            Keycode::M      => self.key_m = pressed,
             _ => (), // Do nothing
         }
     }
@@ -152,6 +157,7 @@ impl InputState {
             Button::DPadDown => self.move_down = pressed,
             Button::DPadLeft => self.move_left = pressed,
             Button::DPadRight => self.move_right = pressed,
+            Button::LeftShoulder => self.speed_down = pressed,
             _ => (), // Do nothing
         }
     }
