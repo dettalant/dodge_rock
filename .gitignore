@@ -2,13 +2,5 @@
 /target
 **/*.rs.bk
 
-# .gitフォルダはいらない
-.git
-
 # いちおうCargo.lockも除外
 Cargo.lock
-
-# 現状ではassetsフォルダはgitに登録しない
-/assets
-# 翻訳テスト用のtlフォルダも登録しない
-/tl

@@ -1,0 +1,10 @@
+# title dialog
+title_logo = "Dodge Rock"
+title_description = "Press any key to start"
+title_headline = "**How to Play**"
+title_tips = [ "1. Allow, WASD, HJKL key to move", "2. Avoid the flying rocks!", "3. If you getting bored, trash it!" ]
+
+# game over dialog
+game_over_title = "Game Over!"
+game_over_score = "Your score is:"
+game_over_tips = [ "R key to Restart", "T key to Title", "Q key to Quit" ]

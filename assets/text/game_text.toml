@@ -1,0 +1,10 @@
+# タイトル画面
+title_logo = "どっじ・ろっく"
+title_description = "なにかキーを押してはじめる"
+title_headline = "**ゲームのあそびかた**"
+title_tips = [ "1. 十字キー・WASDキーなどで移動", "2. 飛んでくる岩をとにかく避けろ！", "3. 飽きたらPCのゴミ箱にダンク！" ]
+
+# ゲームオーバー画面
+game_over_title = "Game Over!"
+game_over_score = "あなたのスコアは:"
+game_over_tips = [ "Rキーでリスタート", "Tキーでタイトルへ", "Qキーでゲーム終了" ]
