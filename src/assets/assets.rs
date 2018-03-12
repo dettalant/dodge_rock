@@ -27,6 +27,7 @@ use conf::GameConf;
 
 /// ダイアログボックス用の変数まとめ
 pub struct Dialog {
+    pub title_box: Rect,
     pub go_box: Rect,
     pub go_box_color: Color,
     pub black_color: Color,
@@ -45,7 +46,7 @@ impl Dialog {
         // 非常にマジックナンバーじみてるので、
         // 次のプロジェクトだとどうにかしたい
         let (go_box_w, go_box_h) = (window_w * 0.75,
-                              window_h * 0.46); 
+                                    window_h * 0.46); 
         
         // 画面中央に、画面の六割ほどのダイアログボックスを表示
         let go_box = graphics::Rect::new(
@@ -55,6 +56,19 @@ impl Dialog {
             go_box_h,
         );
         
+        // タイトルダイアログのサイズ設定
+        let (title_box_w, title_box_h) = (
+            window_w * 0.9,
+            window_h * 0.57,
+        );
+        
+        let title_box = graphics::Rect::new(
+            (window_w - title_box_w) / 2.0,
+            (window_h - title_box_h) / 2.0,
+            title_box_w,
+            title_box_h,
+        );
+        
         let go_box_color = Color::from_rgba(255, 255, 255, 220);
         
         let black_color = Color::from_rgba(0, 0, 0, 255);
@@ -62,6 +76,7 @@ impl Dialog {
         Dialog {
             go_box: go_box,
             go_box_color: go_box_color,
+            title_box: title_box,
             black_color: black_color,
             default_color: graphics::get_color(ctx),
         }
@@ -74,7 +89,8 @@ pub struct Assets {
     pub player_ship: Image,
     pub enemy_block: Image, 
     pub pixel_font: Font,
-    pub pixel_font_big: Font
+    pub pixel_font_small: Font,
+    pub pixel_font_big: Font,
 }
 
 impl Assets {
@@ -91,24 +107,31 @@ impl Assets {
             a_map.get("enemy_block_32x32.png").unwrap(),
         )?; 
         
-        let pixel_font_big = Font::new(
-            ctx,
-            a_map.get("JF-Dot-MPlus12.ttf").unwrap(),
-            26,
-        )?;
-        
         let pixel_font = Font::new(
             ctx,
             a_map.get("JF-Dot-MPlus12.ttf").unwrap(),
             18,
         )?;
-        
+
+        let pixel_font_small = Font::new(
+            ctx,
+            a_map.get("JF-Dot-MPlus12.ttf").unwrap(),
+            15,
+        )?;
+
+        let pixel_font_big = Font::new(
+            ctx,
+            a_map.get("JF-Dot-MPlus12.ttf").unwrap(),
+            26,
+        )?;
+
         Ok(Assets {
             assets_map: a_map,
             dialog: Dialog::new(ctx),
             player_ship: player_ship,
             enemy_block: enemy_block,
             pixel_font: pixel_font,
+            pixel_font_small: pixel_font_small,
             pixel_font_big: pixel_font_big,
         })
     }

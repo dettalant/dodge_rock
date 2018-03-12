@@ -1,12 +1,11 @@
 # setting.toml
 # 各種設定・環境変数はここで設定
-
 [game_option]
-window_size = "default"
 # 固定FPS数値
 constant_fps = 60
 
 [assets]
+# アセットフォルダ設定
 # 読み込むアセットが入ったフォルダ名を指定
 # デフォルト設定は`assets`
 assets_dir = "assets"
@@ -15,9 +14,9 @@ assets_dir = "assets"
 # 翻訳設定
 # `is_translate`を`true`にすると、
 # `translate_data_dir`で指定したフォルダから翻訳データを読み込む
-#
+is_translate = false
+
+# 翻訳データフォルダ設定
 # 翻訳データ側に`assets`フォルダ内データと同名ファイルがあった場合、
 # 翻訳データ側が使用される（読み込み元を上書きする）
-
-is_translate = false
 translate_data_dir = "tl/english"

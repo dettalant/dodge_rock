@@ -86,9 +86,15 @@ impl EventHandler for CoreState {
         while timer::check_update_time(
             ctx, 
             self.game_conf.game_option.constant_fps) {        
-            // ウィンドウがアクティブな際のみ更新させる
-            if self.has_focus && self.game_state.system.is_game_over {
-                self.game_state.game_over_mode(&mut self.input)?;
+            // ウィンドウがアクティブな際のみ更新 & ゲームシーン分岐
+            if self.has_focus && self.game_state.system.is_title {
+                // タイトル画面
+                self.game_state.title_mode(&mut self.input);
+                
+            } else if self.has_focus && self.game_state.system.is_game_over {
+                // ゲームオーバー時の画面
+                self.game_state.game_over_mode(ctx, &mut self.input);
+                
             } else if self.has_focus {
                 // フレーム数を計測して、時間を割り出す
                 measure_time(
@@ -99,12 +105,13 @@ impl EventHandler for CoreState {
                 // メインのゲーム画面
                 self.game_state.main_game_mode(&mut self.input)?;
                 
-            }
+                if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
+                    debug_frames(ctx, &mut self.game_state);
+                }
+            } // end if
             
-            if env::var("GAME_ACTIVATE_MODE").unwrap() == "DEBUG_MODE" {
-                debug_frames(ctx, &mut self.game_state);
-            }
-        }
+        } // end while
+        
         Ok(())
     }
     
@@ -116,7 +123,9 @@ impl EventHandler for CoreState {
         // メインゲーム画面を描画
         view::render_game(self, ctx)?;
         
-        if self.game_state.system.is_game_over {
+        if self.game_state.system.is_title {
+            view::render_title(self, ctx)?;
+        } else if self.game_state.system.is_game_over {
             // ゲームオーバー時にダイアログボックスを出す
             view::render_game_over(self, ctx)?;
         }

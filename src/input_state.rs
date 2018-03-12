@@ -49,7 +49,13 @@ pub struct InputState {
     pub speed_down: bool,
     /// ゲームをリスタート
     pub game_reset: bool,
-    /// デバッグ用
+    /// ゲームオーバー画面からタイトル画面へ向かう
+    pub game_title: bool,
+    /// ゲームオーバー画面でゲームを終了させる
+    pub game_quit: bool,
+    /// なにかキーをおして〜〜用に、すべてのキーで反応するやつ
+    pub any_key: bool,
+    /// デバッグ用キー
     pub key_m: bool,
 }
 
@@ -58,6 +64,26 @@ impl InputState {
     pub fn new() -> InputState {
         let input: InputState = Default::default();
         input
+    }
+    
+    /// キー入力をリセットする
+    pub fn reset(&mut self) {
+        // リセット用の変数束縛
+        let input: InputState = Default::default();
+        
+        // 見よ、この強引なリセット！
+        self.axis_lx = input.axis_lx;
+        self.axis_ly = input.axis_ly;
+        self.move_up = input.move_up;
+        self.move_down = input.move_down;
+        self.move_left = input.move_left;
+        self.move_right = input.move_right;
+        self.speed_down = input.speed_down;
+        self.game_reset = input.game_reset;
+        self.game_title = input.game_title;
+        self.game_quit = input.game_quit;
+        self.any_key = input.any_key;
+        self.key_m = input.key_m;
     }
     
     /// キーが押されたら、入力信号をtrueに。キーボード用。
@@ -89,13 +115,12 @@ impl InputState {
     
     // アナログスティック入力を振り分ける
     pub fn axis_controll(&mut self, axis: Axis, value: i16) {
-        
         match axis {
+            // 左スティックのみ使用
             Axis::LeftX => self.axis_lx = value,
             Axis::LeftY => self.axis_ly = value,
             _ => (),
         }
-        
     }
     
     /// 入力キーごとに判定を変えるのがココ。キーボード用。
@@ -106,13 +131,14 @@ impl InputState {
           キーごとに反応を返す
           愚直にboolを使うことにした
           
-          ボタン入力がある時:
-          上下左右 == true
+          キー入力がある時 == true
         
-          キー入力がない時:
-          上下左右 == false
+          キー入力がない時  == false
         */
         
+        // 「なにかキーが押されたら〜〜」イベント用に
+        self.any_key = pressed;
+                
         // 方向キー、wasdキー、hjklキー(vim配列)に対応。
         match keycode {
             // 方向キー
@@ -135,6 +161,10 @@ impl InputState {
             Keycode::RShift => self.speed_down = pressed,
             // ゲームリスタート
             Keycode::R      => self.game_reset = pressed,
+            // タイトル画面へ
+            Keycode::T      => self.game_title = pressed,
+            // ゲーム終了
+            Keycode::Q      => self.game_quit = pressed,
             // デバッグ用キー
             Keycode::M      => self.key_m = pressed,
             _ => (), // Do nothing
@@ -147,21 +177,24 @@ impl InputState {
                          pressed: bool) {
         /* 
           とりあえずわかりやすいボタンに対するやつ
-          ggezの仕様的に、xbox360コン準拠。
+          ggezの仕様でxbox360コン準拠。
           
-          ボタン入力がある時:
-          上下左右 == true
+          ボタン入力がある時 == true
         
-          キー入力がない時:
-          上下左右 == false
+          ボタン入力がない時 == false
         */
         
+        self.any_key = pressed;
+        
         match btn {
+            // 十字キーでの移動
             Button::DPadUp => self.move_up = pressed,
             Button::DPadDown => self.move_down = pressed,
             Button::DPadLeft => self.move_left = pressed,
             Button::DPadRight => self.move_right = pressed,
+            // 低速移動
             Button::LeftShoulder => self.speed_down = pressed,
+            Button::RightShoulder => self.speed_down = pressed,
             _ => (), // Do nothing
         }
     }

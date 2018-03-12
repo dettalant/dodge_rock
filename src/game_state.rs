@@ -181,7 +181,7 @@ impl System {
             window_h: ctx.conf.window_mode.height,
             frames: 0,
             seconds: 0,
-            is_title: false,
+            is_title: true,
             is_game_over: false,
             is_score_wrote: false,
             player_move_speed: 2.0,
@@ -214,15 +214,31 @@ impl GameState {
         }
     }
     
+    /// タイトル画面を管理
+    pub fn title_mode(&mut self,
+                      input: &mut InputState) {
+        if input.any_key {
+            self.system.is_title = false;
+        }
+    }
     /// ゲームオーバー時の画面を管理
-    pub fn game_over_mode(&mut self, input: &mut InputState) -> GameResult<()> {
+    pub fn game_over_mode(&mut self,
+                          ctx: &mut Context,
+                          input: &mut InputState) {
         if input.game_reset {
-            println!("ゲームリスタート！");
+            // ゲームを再度はじめる
             self.game_reset();
             self.system.is_game_over = false;
+        } else if input.game_title {
+            // タイトル画面へ
+            self.game_reset();
+            self.system.is_game_over = false;
+            self.system.is_title = true;
+            input.reset();
+        } else if input.game_quit {
+            // ゲーム終了
+            ctx.quit().expect("ゲーム終了時のエラー");
         }
-        
-        Ok(())
     }
     
     /// ゲーム状態を初期化する
@@ -430,7 +446,7 @@ impl GameState {
         
         // この部分に衝突時の内容を書き加える
         if is_crash {
-            println!("{}, クラッシュ！", self.system.frames);
+            // println!("{}, クラッシュ！", self.system.frames);
             self.system.is_game_over = true;
         }
     }

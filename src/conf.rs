@@ -30,7 +30,6 @@ pub struct GameConf {
 
 #[derive(Debug, Deserialize)]
 pub struct GameOption {
-   pub window_size: String,
    pub constant_fps: u32,
 }
 

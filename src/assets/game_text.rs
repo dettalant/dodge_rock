@@ -16,9 +16,13 @@ use etc;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Source {
-    pub game_over_title: String,
-    pub game_over_score: String,
-    pub game_over_tips: Vec<String>,
+    title_logo: String,
+    title_description: String,
+    title_headline: String,
+    title_tips: Vec<String>,
+    game_over_title: String,
+    game_over_score: String,
+    game_over_tips: Vec<String>,
 }
 
 impl Source {
@@ -45,7 +49,10 @@ impl Source {
 
 #[derive(Clone, Debug)]
 pub struct GameText {
-    src: Source,
+    pub title_logo: Text,
+    pub title_description: Text,
+    pub title_headline: Text,
+    pub title_tips: Vec<Text>,
     pub game_over_title: Text,
     pub game_over_score: Text,
     pub game_over_score_num: Text,
@@ -57,6 +64,30 @@ impl GameText {
     pub fn new(ctx: &mut Context,
                assets: &Assets) -> GameResult<Self> {
         let src = Source::new(assets)?;
+        
+        let title_logo = Text::new(
+            ctx,
+            &src.title_logo,
+            &assets.pixel_font_big,
+        )?;
+        
+        let title_description = Text::new(
+            ctx,
+            &src.title_description,
+            &assets.pixel_font_small,
+        )?;
+        
+        let title_headline = Text::new(
+            ctx,
+            &src.title_headline,
+            &assets.pixel_font_small,
+        )?;
+        
+        let title_tips = GameText::from_array(
+            ctx,
+            &src.title_tips,
+            &assets.pixel_font_small,
+        )?;
         
         let game_over_title = Text::new(
             ctx,
@@ -74,14 +105,17 @@ impl GameText {
         // ほんとは空テキストを出力できる機能がggezにあるべきなのよ。
         let game_over_score_num = game_over_score.clone();
         
-        let game_over_tips = GameText::from_vec(
+        let game_over_tips = GameText::from_array(
             ctx,
-            assets,
-            &src.game_over_tips
+            &src.game_over_tips,
+            &assets.pixel_font,
         )?;
         
         Ok(GameText {
-            src: src,
+            title_logo: title_logo,
+            title_description: title_description,
+            title_headline: title_headline,
+            title_tips: title_tips,
             game_over_title: game_over_title,
             game_over_score: game_over_score,
             game_over_score_num: game_over_score_num,
@@ -99,7 +133,7 @@ impl GameText {
         let out_t = Text::new(
             ctx,
             &tmp_t,
-            &font,
+            font,
         )?;
         
         self.game_over_score_num = out_t;
@@ -107,21 +141,16 @@ impl GameText {
         Ok(())
     }
     
-    /// src要素を返す関数
-    pub fn src(&self) -> &Source {
-        &self.src
-    }
-    
-    fn from_vec(ctx: &mut Context,
-                assets: &Assets,
-                in_vec: &Vec<String>) -> GameResult<Vec<Text>> {
+    fn from_array(ctx: &mut Context,
+                  in_vec: &Vec<String>,
+                  font: &Font) -> GameResult<Vec<Text>> {
         let mut out_vec = Vec::with_capacity(in_vec.len());
         
         for li in in_vec {
             let tmp_t = Text::new(
                 ctx,
                 &li,
-                &assets.pixel_font
+                font
             )?;
             
             out_vec.push(tmp_t);

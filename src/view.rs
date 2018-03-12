@@ -92,6 +92,99 @@ fn debug_render(core: &mut CoreState,
     Ok(())
 }
 
+/// タイトル画面を描画する
+pub fn render_title(core: &mut CoreState,
+                    ctx: &mut Context) -> GameResult<()> {
+    // foreground colorを変える
+    graphics::set_color(ctx,
+                        core.assets.dialog.go_box_color)?;
+    
+    // ダイアログボックスを表示
+    graphics::rectangle(ctx,
+                        graphics::DrawMode::Fill,
+                        core.assets.dialog.title_box)?;
+    
+    render_title_dialog_text(core, ctx)?;
+    
+    // foreground colorを元に戻す
+    graphics::set_color(ctx,
+                        core.assets.dialog.default_color)?;
+    Ok(())
+}
+
+/// タイトル画面の説明文章を描画する
+fn render_title_dialog_text(core: &mut CoreState,
+                            ctx: &mut Context) -> GameResult<()> {
+    let (title_logo_pos, 
+         title_description_pos, 
+         title_headline_pos, 
+         title_tips_pos) = title_dialog_text_pos(core);
+    
+    graphics::set_color(ctx,
+                        core.assets.dialog.black_color)?;
+    
+    graphics::draw(ctx,
+                   &core.text.title_logo,
+                   title_logo_pos,
+                   0.0)?;
+    
+    graphics::draw(ctx,
+                   &core.text.title_headline,
+                   title_headline_pos,
+                   0.0)?;
+    
+    draw_ml_text(ctx,
+                 &core.text.title_tips,
+                 title_tips_pos,
+                 0.0)?;
+    
+    graphics::draw(ctx,
+                   &core.text.title_description,
+                   title_description_pos,
+                   0.0)?;
+
+    graphics::set_color(ctx,
+                        core.assets.dialog.default_color)?;
+    
+    Ok(())
+}
+
+/// タイトル画面説明文のPoint2を設定する
+fn title_dialog_text_pos(core: &mut CoreState) 
+    -> (Point2, Point2, Point2, Vec<Point2>) {
+    
+    let (window_w, window_h) = (
+        core.game_state.system.window_w as f32,
+        core.game_state.system.window_h as f32,
+    );
+    
+    let title_logo_pos = Point2::new(
+        (window_w - core.text.title_logo.width() as f32) / 2.0,
+        (window_h - core.text.title_logo.height() as f32 ) * 0.285,
+    );
+    
+    let title_description_pos = Point2::new(
+        (window_w - core.text.title_description.width() as f32) / 2.0,
+        (window_h - core.text.title_description.height() as f32 ) * 0.72,
+    );
+    
+    let title_headline_pos = Point2::new(
+        (window_w - core.text.title_headline.width() as f32) / 2.0,
+        (window_h - core.text.title_headline.height() as f32 ) * 0.435,
+    );
+    
+    let title_tips_pos = calc_ml_text_pos(
+        &core.text.title_tips,
+        window_w,
+        window_h,
+        0.5,
+        0.5,
+    );
+    
+    (title_logo_pos, title_description_pos, title_headline_pos, title_tips_pos)
+}
+
+/// ゲームオーバー画面を描画する
 pub fn render_game_over(core: &mut CoreState,
                         ctx: &mut Context) -> GameResult<()> {
     // foreground colorを変える
@@ -112,6 +205,7 @@ pub fn render_game_over(core: &mut CoreState,
     Ok(())
 }
 
+/// ゲームオーバー画面の文章を描画する
 fn render_game_over_dialog_text(core: &mut CoreState,
                                 ctx: &mut Context) -> GameResult<()> {
     let (go_title_pos, go_score_pos, go_tip_pos) = game_over_dialog_text_pos(core);    
@@ -129,7 +223,7 @@ fn render_game_over_dialog_text(core: &mut CoreState,
                    go_score_pos,
                    0.0)?;
     
-    render_result_score(core, ctx)?;
+    render_game_over_score(core, ctx)?;
     
     draw_ml_text(ctx,
                  &core.text.game_over_tips,
@@ -164,13 +258,13 @@ fn game_over_dialog_text_pos(core: &mut CoreState) -> (Point2, Point2, Vec<Point
         window_w,
         window_h,
         0.5,
-        0.575,
+        0.568,
     );
     
     (go_title_pos, go_score_pos, go_tip_pos)
 }
 
-fn render_result_score(core: &mut CoreState,
+fn render_game_over_score(core: &mut CoreState,
                        ctx: &mut Context) -> GameResult<()>{
     // 一ゲーム中に一度だけスコアを印字
     if !core.game_state.system.is_score_wrote {
@@ -223,7 +317,7 @@ fn calc_ml_text_pos(in_vec: &Vec<Text>,
         );
        
         // 予幅を付けておいたほうが綺麗に表示できるはず  
-        tmp_height += in_vec[i].height() as f32 + 20.0;
+        tmp_height += in_vec[i].height() as f32 + 22.0;
         out_vec.push(tmp_pos);
     }
     
