@@ -4,10 +4,10 @@
   ゲーム内システム進行についてを、GameStateの形でまとめる
   画面描画については別（view.rsを参照）
     
-  * struct Player: プレイヤーキャラについて。また今度別の場所に移したい
-  * struct Enemy :
-  * struct Template:
-  * struct Actor : 意識を持つようにして動くもの。また今度別の場所に移したい。
+  * struct Player: プレイヤーキャラについて。
+  * struct Enemy : 敵キャラ
+  * struct Template: clone()元になるテンプレート入れ
+  * struct Actor :  意識を持つようにして動くもの。また今度別の場所に移したい。
   * struct System: ゲームシステムに影響を持つ変数はここに。
   
   * impl Template:
@@ -15,13 +15,18 @@
     
   * impl Actor: 
     * new()
+    * reset()
     * add_e_block()
 
   * impl System:
     * new()
+    * reset()
   
   * impl GameState: ゲーム内システム進行について
     * new(): よくある初期化
+    * title_mode()
+    * game_over_mode()
+    * game_reset() : リスタート用に一部変数を初期化
     * main_game_system_loop(): メインゲームループを扱う
     * player_move(): 自機移動についてのもろもろ
     * player_move_speed(): 現在の自機移動速度を出す
@@ -29,8 +34,10 @@
     * enemy_move()
     * enemy_move_speed()
     * enemy_move_speed_adjust()
+    * enemy_collision_check()
     * enemy_pop()
-    * debug_key():
+    * enemy_pop_width()
+    * debug_key()
   
   * axis_move()   : アナログスティック操作変数を、画面描画に役立つ形に直す
   * key_move()    : 十字キー操作変数を、画面描画に役立つ形に直す

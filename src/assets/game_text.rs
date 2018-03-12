@@ -4,6 +4,13 @@
   ゲーム内で表示するテキストを一挙に取ってくる
   Tomlから取得する予定
   
+  * struct Source: tomlファイルから読み込んだ内容がここに
+  
+  * impl GameText:
+    * new()
+    * new_score() : スコア表示のためTextを再生成
+    * from_array()
+  
 -------------------------------*/
 use std::io::Result;
 

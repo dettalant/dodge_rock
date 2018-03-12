@@ -8,6 +8,7 @@
   
   * Assets impl
     * new()               : 親フォルダ名から一括でデータ出力。外部用。
+    * show_map()          :
     * debug_new()         : デバッグに役立つ簡易版
     * set_assets_map()    : 再帰読み込みした結果物を出力するやつ
     * set_assets_dir()    : 再帰読み込みを始める親フォルダを指定

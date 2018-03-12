@@ -10,6 +10,15 @@
   * render_player(): プレイヤー周りを描画する
   * render_enemy() :
   * debug_render() :
+  * render_title() :
+  * render_title_dialog_text()
+  * title_dialog_text_pos()
+  * render_game_over()
+  * render_game_over_dialog_text() : 名前が長すぎる
+  * game_over_dialog_text_pos()
+  * render_game_over_score()       : スコア部分を描画
+  * calc_ml_text() * 複数行Vec<Text>のPoint2生成
+  * draw_ml_text() : 複数行Vec<Text>を描画
 -------------------------------*/ 
 use std::env;
 

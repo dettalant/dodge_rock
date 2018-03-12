@@ -4,3 +4,6 @@
 
 # いちおうCargo.lockも除外
 Cargo.lock
+
+# 未使用ファイル
+src/audio.rs

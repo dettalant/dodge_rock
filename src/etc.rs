@@ -5,7 +5,7 @@
   細々とした関数をひとまとめにする
 
   * impl File
-    * empty_dir_remove(): エラーを吐かせないためにわざわざ確認する。これいる？
+    * empty_dir_remove(): エラーを吐かせないためにわざわざフォルダ内を確認する。これいる？
     * read_to_string   : stringとしてファイルを読み取る
     * read_to_vec      : Vec<u8>としてファイルを読み取る
 
