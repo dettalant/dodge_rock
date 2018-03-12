@@ -81,12 +81,22 @@ pub struct Enemy {
 #[derive(Clone, Debug)]
 /// 敵追加のためのテンプレート
 pub struct Template {
+    pub player: Player,
     pub e_block: Enemy,
 }
 
 impl Template {
     /// struct Templateを生成する
-    pub fn new(assets: &assets::Assets) -> Self {
+    pub fn new(assets: &assets::Assets, 
+               system: &System) -> Self {
+        let player = Player {
+            x: (system.window_w - assets.player_ship.width()) as f32 / 2_f32,
+            y: system.window_h as f32 * 0.7,
+            width: assets.player_ship.width(),
+            height: assets.player_ship.height(),
+            collision: Range2D::default(),
+        };
+        
         let e_block = Enemy {
             x: 0.0,
             y: 0.0,
@@ -96,6 +106,7 @@ impl Template {
         };
         
         Template {
+            player: player,
             e_block: e_block,
         }
     }
@@ -113,15 +124,9 @@ impl Actor {
     /// struct Actorを生成する
     pub fn new(assets: &assets::Assets,
                system: &System) -> Self {        
-        let player = Player {
-            x: (system.window_w - assets.player_ship.width()) as f32 / 2_f32,
-            y: system.window_h as f32 * 0.7,
-            width: assets.player_ship.width(),
-            height: assets.player_ship.height(),
-            collision: Range2D::default(),
-        };
-        
-        let template = Template::new(assets);
+
+        let template = Template::new(assets, system);
+        let player = template.player.clone();
         
         Actor {
             player: player,
@@ -138,6 +143,12 @@ impl Actor {
         
         self.e_block.push(tmp_e);
     }
+    
+    // ゲームシステムに関わる部分をリセット
+    fn reset(&mut self) {
+        self.player = self.template.player.clone();
+        self.e_block = Vec::<Enemy>::new();
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -147,6 +158,8 @@ pub struct System {
     pub window_w: u32,
     pub frames: usize,
     pub seconds: usize,
+    pub is_title: bool,
+    pub is_game_over: bool,
     pub player_move_speed: f32,
     pub enemy_move_speed: f32,
 }
@@ -158,9 +171,18 @@ impl System {
             window_h: ctx.conf.window_mode.height,
             frames: 0,
             seconds: 0,
+            is_title: false,
+            is_game_over: false,
             player_move_speed: 2.0,
             enemy_move_speed: 1.0,
         }
+    }
+    
+    // ゲームシステムに関わる部分をリセット
+    fn reset(&mut self) {
+        self.frames = 0;
+        self.seconds = 0;
+        self.enemy_move_speed = 1.0;
     }
 }
 
@@ -180,8 +202,38 @@ impl GameState {
         }
     }
     
+    /// ゲームオーバー時の画面を管理
+    pub fn game_over_mode(&mut self, input: &mut InputState) -> GameResult<()> {
+        
+        
+        if input.game_reset {
+            println!("ゲームリスタート！");
+            self.game_reset();
+            self.system.is_game_over = false;
+        }
+        
+        Ok(())
+    }
+    
+    /// ゲーム状態を初期化する
+    pub fn game_reset(&mut self) {
+        // struct System の初期化
+        self.system.reset();
+        
+        // struct Actor の初期化
+        self.actor.reset();
+        
+        // 敵キャラを一体出しておく
+        self.actor.add_e_block(
+            etc::random_x(self.system.window_w), 
+            -50.0,
+        );
+        
+        // タイトル画面を実装したら、タイトル画面は省く処理が必要
+    }
+    
     /// メインのゲーム画面を管理するやつ 
-    pub fn main_game_mode(&mut self, input: &mut InputState) -> GameResult<()>{
+    pub fn main_game_mode(&mut self, input: &mut InputState) -> GameResult<()> {
         // 自機移動
         self.player_move(input);
         // 自機が画面外に出ないようにチェック
@@ -344,7 +396,7 @@ impl GameState {
     }
     
     /// 敵の当たり判定処理
-    fn enemy_collision_check(&self) {
+    fn enemy_collision_check(&mut self) {
         // thread移行させるため安易にclone()
         let e_block_vec = self.actor.e_block.clone();
         let p_collision = self.actor.player.collision.clone();
@@ -364,6 +416,7 @@ impl GameState {
         // この部分に衝突時の内容を書き加える
         if is_crash {
             println!("{}, クラッシュ！", self.system.frames);
+            self.system.is_game_over = true;
         }
     }
     

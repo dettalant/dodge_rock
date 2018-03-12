@@ -47,6 +47,8 @@ pub struct InputState {
     pub move_right: bool,
     /// 低速移動
     pub speed_down: bool,
+    /// ゲームをリスタート
+    pub game_reset: bool,
     /// デバッグ用
     pub key_m: bool,
 }
@@ -131,6 +133,8 @@ impl InputState {
             // 低速移動
             Keycode::LShift => self.speed_down = pressed,
             Keycode::RShift => self.speed_down = pressed,
+            // ゲームリスタート
+            Keycode::R      => self.game_reset = pressed,
             // デバッグ用キー
             Keycode::M      => self.key_m = pressed,
             _ => (), // Do nothing

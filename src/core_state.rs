@@ -28,7 +28,6 @@ use ggez::{ self, Context, GameResult };
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
 use assets::Assets;
-use etc;
 use conf::GameConf;
 use input_state::InputState;
 use game_state::GameState;
@@ -61,10 +60,7 @@ impl CoreState {
         }
         
         // 初期状態で敵を一体出現させる
-        game_state.actor.add_e_block(
-            etc::random_x(game_state.system.window_w), 
-            -50.0,
-        );
+        game_state.game_reset();
         
         Ok(CoreState {
             has_focus: false,
@@ -86,7 +82,9 @@ impl EventHandler for CoreState {
             ctx, 
             self.game_conf.game_option.constant_fps) {        
             // ウィンドウがアクティブな際のみ更新させる
-            if self.has_focus {
+            if self.has_focus && self.game_state.system.is_game_over {
+                self.game_state.game_over_mode(&mut self.input)?;
+            } else if self.has_focus {
                 // フレーム数を計測して、時間を割り出す
                 measure_time(
                     &mut self.game_state,
