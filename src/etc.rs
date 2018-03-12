@@ -10,7 +10,7 @@
     * read_to_vec      : Vec<u8>としてファイルを読み取る
 
   * unused_dir_remove(): ggezが自動生成するフォルダを削除
-  * eazy_path_set()    : cargo環境でも通常環境でも適応できるpathをセット
+  * easy_path_set()    : cargo環境でも通常環境でも適応できるpathをセット
   * random_x()         : 敵出現位置用の乱数を取るやつ
 -------------------------------*/
 use std;
@@ -95,7 +95,7 @@ pub fn unused_dir_remove(ctx: &mut ggez::Context) -> ggez::GameResult<()> {
 /// cargo環境なら、プロジェクトディレクトリのpathから始める
 ///
 /// そうでないなら、バイナリがあるフォルダから始める
-pub fn eazy_path_set<'a>(path_str: &'a str) -> PathBuf {
+pub fn easy_path_set<'a>(path_str: &'a str) -> PathBuf {
     // 入力変数例: `path_str = "game_setting.toml"`
     let mut path_base = PathBuf::new();
     

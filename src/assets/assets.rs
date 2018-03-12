@@ -4,6 +4,8 @@
   ゲームアセットを処理する部分
   主にassetsフォルダからの自動読み込み
   
+  * struct Dialog
+  
   * Assets impl
     * new()               : 親フォルダ名から一括でデータ出力。外部用。
     * debug_new()         : デバッグに役立つ簡易版
@@ -18,14 +20,61 @@ use std::collections::HashMap;
 use std::io::Result;
 
 use ggez::{ Context, GameResult };
-use ggez::graphics::Image;
+use ggez::graphics::{ self, Color, Font, Image, Rect,};
 
 use etc;
 use conf::GameConf;
 
+/// ダイアログボックス用の変数まとめ
+pub struct Dialog {
+    pub go_box: Rect,
+    pub go_box_color: Color,
+    pub black_color: Color,
+    pub default_color: Color,
+}
+
+impl Dialog {
+    fn new(ctx: &mut Context) -> Self {
+        
+        let (window_w, window_h) = (
+            ctx.conf.window_mode.width as f32,
+            ctx.conf.window_mode.height as f32,
+        );
+        
+        // ゲームオーバーダイアログのサイズ設定
+        // 非常にマジックナンバーじみてるので、
+        // 次のプロジェクトだとどうにかしたい
+        let (go_box_w, go_box_h) = (window_w * 0.75,
+                              window_h * 0.46); 
+        
+        // 画面中央に、画面の六割ほどのダイアログボックスを表示
+        let go_box = graphics::Rect::new(
+            (window_w - go_box_w) / 2.0,
+            (window_h - go_box_h) / 2.0,
+            go_box_w,
+            go_box_h,
+        );
+        
+        let go_box_color = Color::from_rgba(255, 255, 255, 220);
+        
+        let black_color = Color::from_rgba(0, 0, 0, 255);
+        
+        Dialog {
+            go_box: go_box,
+            go_box_color: go_box_color,
+            black_color: black_color,
+            default_color: graphics::get_color(ctx),
+        }
+    }
+}
+
 pub struct Assets {
+    assets_map: HashMap<String, PathBuf>,
+    pub dialog: Dialog,
     pub player_ship: Image,
-    pub enemy_block: Image,
+    pub enemy_block: Image, 
+    pub pixel_font: Font,
+    pub pixel_font_big: Font
 }
 
 impl Assets {
@@ -34,19 +83,41 @@ impl Assets {
         let a_map = Assets::set_assets_map(conf)?;
         let player_ship = Image::new(
             ctx, 
-            a_map.get("player_ship_29x48.png").unwrap(), // うろおぼえ実装だから後で確認
+            a_map.get("player_ship_29x48.png").unwrap(),
         )?; 
         
         let enemy_block = Image::new(
             ctx, 
-            a_map.get("enemy_block_32x32.png").unwrap(), // うろおぼえ実装だから後で確認
+            a_map.get("enemy_block_32x32.png").unwrap(),
         )?; 
-
+        
+        let pixel_font_big = Font::new(
+            ctx,
+            a_map.get("JF-Dot-MPlus12.ttf").unwrap(),
+            26,
+        )?;
+        
+        let pixel_font = Font::new(
+            ctx,
+            a_map.get("JF-Dot-MPlus12.ttf").unwrap(),
+            18,
+        )?;
+        
         Ok(Assets {
+            assets_map: a_map,
+            dialog: Dialog::new(ctx),
             player_ship: player_ship,
             enemy_block: enemy_block,
+            pixel_font: pixel_font,
+            pixel_font_big: pixel_font_big,
         })
     }
+    
+    // 他所で使いまわすために、assets mapを参照渡し
+    pub fn show_map<'a>(&'a self) -> &'a HashMap<String, PathBuf> {
+        &self.assets_map
+    }
+    
     /// Assets mapだけを生成する（読み取るだけ）
     pub fn new_map<'a>(conf: &'a GameConf) -> GameResult<HashMap<String, PathBuf>> {
         let a_map = Assets::set_assets_map(conf)?;
@@ -69,7 +140,7 @@ impl Assets {
         // 環境変数に翻訳データが登録されてたら、そのディレクトリを追加
         // 安易な処理なので、もしかしたらバグが起きるかも。注意ね。
         if conf.translate.is_translate {
-            let tmp_tl_path = etc::eazy_path_set(&conf.translate.translate_data_dir);
+            let tmp_tl_path = etc::easy_path_set(&conf.translate.translate_data_dir);
             
             if !tmp_tl_path.exists() {
                 panic!("Error: 存在しない翻訳データフォルダが指定された");
@@ -110,7 +181,7 @@ impl Assets {
         let mut base = HashMap::new();
         
         // プロジェクトフォルダの場所を取り出す
-        let base_path = etc::eazy_path_set("");
+        let base_path = etc::easy_path_set("");
         
         // 今思うともう少しシンプルに書けたかも
         while dir_tmp.len() > 0 {

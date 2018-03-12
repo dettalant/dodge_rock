@@ -154,13 +154,23 @@ impl Actor {
 #[derive(Clone, Debug)]
 /// ゲームシステムと関係する変数をここに入れる
 pub struct System {
-    pub window_h: u32,
+    /// ウィンドウサイズ横幅
     pub window_w: u32,
+    /// ウィンドウサイズ縦幅
+    pub window_h: u32,
+    /// 耐久フレーム数
     pub frames: usize,
+    /// 耐久秒数
     pub seconds: usize,
+    /// タイトル画面が表示されているか否か
     pub is_title: bool,
+    /// ゲームオーバー画面が表示されているか否か
     pub is_game_over: bool,
+    /// スコアが出力されたかどうか
+    pub is_score_wrote: bool,
+    /// 自機移動速度
     pub player_move_speed: f32,
+    /// 敵移動速度
     pub enemy_move_speed: f32,
 }
 
@@ -173,6 +183,7 @@ impl System {
             seconds: 0,
             is_title: false,
             is_game_over: false,
+            is_score_wrote: false,
             player_move_speed: 2.0,
             enemy_move_speed: 1.0,
         }
@@ -183,6 +194,7 @@ impl System {
         self.frames = 0;
         self.seconds = 0;
         self.enemy_move_speed = 1.0;
+        self.is_score_wrote = false;
     }
 }
 
@@ -204,8 +216,6 @@ impl GameState {
     
     /// ゲームオーバー時の画面を管理
     pub fn game_over_mode(&mut self, input: &mut InputState) -> GameResult<()> {
-        
-        
         if input.game_reset {
             println!("ゲームリスタート！");
             self.game_reset();
@@ -222,10 +232,11 @@ impl GameState {
         
         // struct Actor の初期化
         self.actor.reset();
-        
+
         // 敵キャラを一体出しておく
+        let tmp_n = self.enemy_pop_width();
         self.actor.add_e_block(
-            etc::random_x(self.system.window_w), 
+            etc::random_x(tmp_n), 
             -50.0,
         );
         
@@ -387,12 +398,16 @@ impl GameState {
     fn enemy_pop(&mut self) {
         // 今はとりあえず、4秒ごとに敵を1体増やす
         if self.system.frames % 240 == 0 {
-            let tmp_n = self.system.window_w - self.actor.template.e_block.width;
+            let tmp_n = self.enemy_pop_width();
             self.actor.add_e_block(
                 etc::random_x(tmp_n),
                 -50.0,
             );
         }
+    }
+    
+    fn enemy_pop_width(&self) -> u32 {
+        self.system.window_w - self.actor.template.e_block.width
     }
     
     /// 敵の当たり判定処理

@@ -52,7 +52,7 @@ impl GameConf {
     ///
     /// `GameConf::new("game_option.toml");` というふうに使う
     pub fn new<'a>(path_str: &'a str) -> Result<Self> {
-        let conf_path = etc::eazy_path_set(path_str);
+        let conf_path = etc::easy_path_set(path_str);
         let game_conf = GameConf::toml_serde(&conf_path)?;
 
         Ok(game_conf)

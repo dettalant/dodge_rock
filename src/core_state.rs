@@ -23,11 +23,11 @@
 -------------------------------*/ 
 use std::env;
 
-use ggez::{ timer };
+use ggez::{ graphics, timer };
 use ggez::{ self, Context, GameResult };
 use ggez::event::{ Axis, Button, EventHandler, Keycode, Mod };
 
-use assets::Assets;
+use assets::{ Assets, GameText };
 use conf::GameConf;
 use input_state::InputState;
 use game_state::GameState;
@@ -39,6 +39,8 @@ pub struct CoreState {
     pub has_focus: bool,
     /// ゲームアセットをひとまとめ
     pub assets: Assets,
+    /// ゲーム内で使うテキストまとめ
+    pub text: GameText,
     /// ユーザー操作をinputとして受ける
     pub input: InputState,
     /// ゲーム内で使う変数まとめ
@@ -52,6 +54,8 @@ impl CoreState {
     /// ゲーム根幹システムの初期化
     pub fn new(ctx: &mut Context, conf: GameConf) -> GameResult<CoreState> {
         let assets = Assets::new(ctx, &conf)?;
+        let game_text = GameText::new(ctx, &assets)?;
+        
         let mut game_state = GameState::new(ctx, &assets);
         
         // "-d"引数を付けて起動した際のデバッグモード
@@ -59,12 +63,13 @@ impl CoreState {
             print_debug(ctx, &game_state, &conf);
         }
         
-        // 初期状態で敵を一体出現させる
+        // ゲーム初期状態にリセットをかけておく
         game_state.game_reset();
         
         Ok(CoreState {
             has_focus: false,
             assets: assets,
+            text: game_text,
             input: InputState::new(),
             game_state: game_state,
             game_conf: conf,
@@ -105,8 +110,19 @@ impl EventHandler for CoreState {
     
     // 画面を描画する部分
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-
+        // 画面の初期化
+        graphics::clear(ctx);
+        
+        // メインゲーム画面を描画
         view::render_game(self, ctx)?;
+        
+        if self.game_state.system.is_game_over {
+            // ゲームオーバー時にダイアログボックスを出す
+            view::render_game_over(self, ctx)?;
+        }
+        
+        // 描画内容を画面に反映
+        graphics::present(ctx);
         
         Ok(())
     }
