@@ -43,6 +43,7 @@ Dodge Rock
 
 ```
 cargo run --release
+./dodge_rock
 ```
 
 # ライセンス表記

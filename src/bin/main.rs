@@ -27,7 +27,7 @@ fn ggez_init(conf: GameConf) {
         let mut path = PathBuf::from(manifest_dir);
         cb = cb.add_resource_path(path);
     } else {
-        // cargo環境でない場合は、バイナリ位置から走査するので問題なし
+        cb = cb.add_resource_path("./");
     }
     
     let ctx = &mut cb.build().expect("ggez ContextBuilderのエラー");

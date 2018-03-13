@@ -2,6 +2,7 @@
 name = "dodge_rock"
 version = "0.1.0"
 authors = ["dettalant <lilac@dettalant.com>"]
+license = "MIT"
 
 [dependencies]
 range_checker = { path = "./components/range_checker" }
@@ -10,3 +11,11 @@ serde = "1.0.27"
 serde_derive = "1.0.27"
 toml = "0.4.5"
 rand = "0.4.2"
+
+[lib]
+name = "dodge_rock"
+path = "src/lib.rs"
+
+[[bin]]
+name = "dodge_rock"
+path = "src/bin/main.rs"
