@@ -39,7 +39,7 @@ Dodge Rock
 
 制作環境はLinuxですが、環境依存の強いライブラリは使ってないので、他プラットフォームでも動くはず。
 
-自分でビルドしたい人は、Rustの管理ツールとしておなじみのCargoを入れた状態で、適当にビルドしてください。
+ビルドしたい人は、Rustの管理ツールとしておなじみのCargoを入れた状態で、適当にビルドしてください。
 
 ```
 cargo run --release
@@ -50,7 +50,7 @@ cargo run --release
 
 僕(dettalant)が制作した部分については[MITライセンス](https://opensource.org/licenses/mit-license.php)とします。
 
-これはゲーム本体である`dodge_rock`に加えて、自作ライブラリである`range_checker`、あとはいくつかの画像も含まれています。
+これはゲーム本体である`dodge_rock`に加えて、自作ライブラリである`range_checker`、あとはいくつかの画像についてです。
 
 # 使用素材・ライブラリ
 
