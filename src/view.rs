@@ -168,18 +168,18 @@ fn title_dialog_text_pos(core: &mut CoreState)
     );
     
     let title_logo_pos = Point2::new(
-        (window_w - core.text.title_logo.width() as f32) / 2.0,
-        (window_h - core.text.title_logo.height() as f32 ) * 0.285,
+        ((window_w - core.text.title_logo.width() as f32) / 2.0).round(),
+        ((window_h - core.text.title_logo.height() as f32 ) * 0.285).round(),
     );
     
     let title_description_pos = Point2::new(
-        (window_w - core.text.title_description.width() as f32) / 2.0,
-        (window_h - core.text.title_description.height() as f32 ) * 0.72,
+        ((window_w - core.text.title_description.width() as f32) / 2.0).round(),
+        ((window_h - core.text.title_description.height() as f32 ) * 0.72).round(),
     );
     
     let title_headline_pos = Point2::new(
-        (window_w - core.text.title_headline.width() as f32) / 2.0,
-        (window_h - core.text.title_headline.height() as f32 ) * 0.435,
+        ((window_w - core.text.title_headline.width() as f32) / 2.0).round(),
+        ((window_h - core.text.title_headline.height() as f32 ) * 0.435).round(),
     );
     
     let title_tips_pos = calc_ml_text_pos(
@@ -253,13 +253,13 @@ fn game_over_dialog_text_pos(core: &mut CoreState) -> (Point2, Point2, Vec<Point
     );
     
     let go_title_pos = Point2::new(
-        (window_w - core.text.game_over_title.width() as f32) / 2.0,
-        (window_h - core.text.game_over_title.height() as f32 ) * 0.32,
+        ((window_w - core.text.game_over_title.width() as f32) / 2.0).round(),
+        ((window_h - core.text.game_over_title.height() as f32 ) * 0.32).round(),
     );
     
     let go_score_pos = Point2::new(
-        (window_w - core.text.game_over_score.width() as f32 ) / 2.0,
-        (window_h - core.text.game_over_score.height() as f32 ) * 0.42,
+        ((window_w - core.text.game_over_score.width() as f32 ) / 2.0).round(),
+        ((window_h - core.text.game_over_score.height() as f32 ) * 0.42).round(),
     );
     
     let go_tip_pos = calc_ml_text_pos(
@@ -321,8 +321,8 @@ fn calc_ml_text_pos(in_vec: &Vec<Text>,
     // 横については一行目を基準に左寄せ。
     for i in 0..in_vec.len() {
         let tmp_pos = Point2::new(
-            (window_w - in_vec[0].width() as f32) * width_adjust,
-            (window_h - in_vec[i].height() as f32 + tmp_height) * height_adjust,
+            ((window_w - in_vec[0].width() as f32) * width_adjust).round(),
+            ((window_h - in_vec[i].height() as f32 + tmp_height) * height_adjust).round(),
         );
        
         // 予幅を付けておいたほうが綺麗に表示できるはず  
