@@ -5,7 +5,7 @@ authors = ["dettalant <lilac@dettalant.com>"]
 license = "MIT"
 
 [dependencies]
-range_checker = { path = "./components/range_checker" }
+range_checker = { git = "https://github.com/dettalant/range_checker.git" }
 ggez = "0.4.0"
 serde = "1.0.27"
 serde_derive = "1.0.27"
