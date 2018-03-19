@@ -3,7 +3,7 @@
 
   ゲーム内システム進行についてを、GameStateの形でまとめる
   画面描画については別（view.rsを参照）
-    
+
   * struct Player: プレイヤーキャラについて。
   * struct Enemy : 敵キャラ
   * struct Template: clone()元になるテンプレート入れ
