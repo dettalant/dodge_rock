@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>ゲーム内容についての説明書</title>
+    <meta name="author" content="dettalant"/>
+    <link rel="stylesheet" href="./doc/css/style.css">
+  </head>
+  <body>
+    <header class="header main_color">
+      <h1>ゲーム内容についての説明書</h1>
+    </header>
+    <main class="main">
+      <h2>あそびかた</h2>
+      <img src="./doc/dodge_rock_title.png" />
+      <p>&nbsp;</p>
+      <ol>
+        <li>十字キーやWASDキーで移動</li>
+        <li>飛んでくる岩をとにかく避けろ！</li>
+        <li>飽きたらPCのゴミ箱にダンク！</li>
+      </ol>
+      <p>シンプルなゲームなので、説明不要かとも思いますが、基本これだけです。</p>
+      <p>&nbsp;</p>
+      <img src="./doc/dodge_rock_main.png" />
+      <p>&nbsp;</p>
+      <p>クリアといった概念は特にありません。</p>
+      <p>ひたすら避けて、ひたすら耐えて、ゴミ箱にダンクするまでがゲームです。</p>
+      <p>&nbsp;</p>
+      <img src="./doc/dodge_rock_game_over.png" />
+      <p>&nbsp;</p>
+      <p>申し訳程度のスコア要素付き。</p>
+      <p>&nbsp;</p>
+      <table>
+        <tr>
+          <th>キー配置</th>
+          <th>効果</th>
+        </tr>
+        <tr>
+          <td>十字キーなど</td>
+          <td>上下左右移動</td>
+        </tr>
+        <tr>
+          <td>Shiftキー</td>
+          <td>低速移動</td>
+        </tr>
+        <tr>
+          <td>Rキー</td>
+          <td>ゲームオーバー画面からリスタート</td>
+        </tr>
+        <tr>
+          <td>Tキー</td>
+          <td>ゲームオーバー画面からタイトル画面へ</td>
+        </tr>
+        <tr>
+          <td>Qキー</td>
+          <td>ゲームオーバー画面でゲーム終了</td>
+        </tr>
+      </table>
+      <p>いちおうゲームパッド対応してるので、アナログスティックなりR1なりでも動かせるはずです。</p>
+      <p>リスタートなどはキーボード使ってね♡</p>
+      <h2>ゲームを自分でビルドしたい方へ</h2>
+      <p>そんな人いるかわからないけど、一応書いときます。</p>
+      <p><a href="https://www.rust-lang.org/ja-JP/">Rust言語</a>の環境を整えてから、<a href="https://github.com/dettalant/dodge_rock">当ゲームのリポジトリ</a>からソースファイルを落としてビルドしてください。</p>
+      <pre><code><!-- 改行消し
+ -->git clone https://github.com/dettalant/dodge_rock.git
+cd dodge_rock
+cargo run --release</code><!-- 改行消し
+      --></pre>
+      <p>ビルドには<a href="https://www.libsdl.org/">SDL2</a>と、その他もろもろのパッケージが必要なので、なかったら適時入れてね。</p>
+      <h2>おまけ情報</h2>
+      <p>開発者ですら細かいと思ってる部分のご紹介</p>
+      <h3>デバッグモード</h3>
+      <p><code>-d</code>、<code>--debug</code>引数をつけて起動するとデバッグモードに入ります。</p>
+      <p>自機当たり判定が表示されたり、コンソール側に敵速度と敵数が表示されたりします。</p>
+      <p>「デバッグ用に使ったの残してるだけでしょ」とは言わないで。</p>
+      <h3>言語切り替え機能</h3>
+      <p>いっちょ前に言語切り替え機能を入れてたりします。</p>
+      <p><code>game_config.toml</code>の<code>is_translate</code>の値を<code>true</code>に変更すると、英語表示になりますよい。</p>
+      <p>下のスクリーンショットは急遽撮影したものなので、デスクトップ環境が違うのは許してね。</p>
+      <p>&nbsp;</p>
+      <img src="./doc/dodge_rock_english_title.png"/>
+      <p>&nbsp;</p>
+      <h3>隠しキー操作</h3>
+      <p>十字キー、WASDキーの他に、実はHJKLキーでの操作にも対応してます。</p>
+      <p>これはいわゆる<a href="https://ja.wikipedia.org/wiki/Vim">Vimエディタ</a>のキーバインディング。</p>
+      <p>いわゆるイースターエッグ的なアレです、はい。</p>
+      <h3>敵速度の加速上限</h3>
+      <p>ないです。いろいろ適当なこのゲームに、そんな高尚なバランス調整とかありません。</p>
+      <p>敵速度加速は青天井、敵増加も青天井、ついでに完全ランダム配置。君はどこまで行ける！？</p>
+      <p>……製作者の僕は4000点もいったことなかったりします。</p>
+    </main>
+    <footer class="footer main_color">
+      <p>つくったひと: <a href="https://twitter.com/dettalant">dettalant</a></p>
+      <p><a href="https://dettalant.com">まださなぎ</a> © 2018</p>
+    </footer>
+  </body>
+</html>

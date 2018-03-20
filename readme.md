@@ -42,8 +42,8 @@ Dodge Rock
 ビルドしたい人は、Rustの管理ツールとしておなじみのCargoを入れた状態で、適当にビルドしてください。
 
 ```
+git clone https://github.com/dettalant/dodge_rock.git
 cargo run --release
-./dodge_rock
 ```
 
 # ライセンス表記
