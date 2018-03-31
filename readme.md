@@ -13,7 +13,7 @@ Dodge Rock
 
 ![メインゲームモード](doc/dodge_rock_main.png)
 
-![ゲームオーバー画面](doc/dodge_rock_title.png)
+![ゲームオーバー画面](doc/dodge_rock_game_over.png)
 
 # ゲーム操作について
 
